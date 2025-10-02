@@ -1,26 +1,30 @@
-import express from "express"
-import { allOrders, placeOrder, placeOrderStripe, UpdateStatus, userOrders, verifyStripe } from "../controllers/orderController.js"
+import express from "express";
+import { allOrders, placeOrder, placeOrderStripe, UpdateStatus, userOrders, verifyStripe } from "../controllers/orderController.js";
 import { verifyAdmin } from "../middleware/verifyAdmin.js";
-import adminAuth from "../middleware/adminAuth.js"
-import authUser from "../middleware/auth.js"
+import adminAuth from "../middleware/adminAuth.js";
+import authUser from "../middleware/auth.js";
+import dotenv from "dotenv";
+dotenv.config();
 
+const orderRouter = express.Router();
 
-const orderRouter = express.Router()
+// Admin routes
+orderRouter.post('/list', adminAuth, allOrders);
+orderRouter.post('/status', adminAuth, UpdateStatus);
+orderRouter.post("/status", verifyAdmin, UpdateStatus); // <-- changed router -> orderRouter
 
-// For Admin
-orderRouter.post('/list', adminAuth, allOrders)
-orderRouter.post('/status', adminAuth, UpdateStatus)
-router.post("/status", verifyAdmin, UpdateStatus);
-// For Payment
-orderRouter.post('/place', authUser, placeOrder)
-orderRouter.post('/stripe', authUser, placeOrderStripe)
-// For user Frontend
-orderRouter.post('/userorders', authUser, userOrders)
+// Payment routes
+orderRouter.post('/place', authUser, placeOrder);
+orderRouter.post('/stripe', authUser, placeOrderStripe);
 
-// verify Payment temporary method
-orderRouter.post('/verifyStripe', authUser, verifyStripe)
+// User frontend routes
+orderRouter.post('/userorders', authUser, userOrders);
+
+// Verify Payment
+orderRouter.post('/verifyStripe', authUser, verifyStripe);
 
 // Optional: public order route
-router.post("/place", placeOrder);
+orderRouter.post("/placePublic", placeOrder);  // avoid duplicate '/place'
 
-export default orderRouter
+// Export router
+export default orderRouter;

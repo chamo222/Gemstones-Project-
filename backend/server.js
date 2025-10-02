@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
@@ -40,4 +42,7 @@ io.on("connection", (socket) => {
   console.log("Admin/frontend connected via WebSocket");
 });
 
-server.listen(port, () => console.log("Server running on port " + port));
+// Bind to 0.0.0.0 for Fly.io
+server.listen(port, "0.0.0.0", () => 
+  console.log("Server running on port " + port)
+);
