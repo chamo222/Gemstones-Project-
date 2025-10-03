@@ -1,13 +1,11 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
-import Stripe from "stripe";
-import { io } from "../server.js"; // ✅ import socket instance
+import { io } from "../server.js"; // Socket.IO instance
 
-// Global variables 
-const currency = "usd"; // use ISO currency for Stripe
+const currency = "usd"; 
 const Delivery_Charges = 350;
 
-// COD order
+// --------------------- COD Order ---------------------
 const placeOrder = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
@@ -28,7 +26,7 @@ const placeOrder = async (req, res) => {
 
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-    // ✅ Emit event to admin + user
+    // Emit new order to admin + user (live update)
     io.emit("newOrder", newOrder);
 
     res.json({ success: true, message: "Order Placed", order: newOrder });
@@ -38,11 +36,10 @@ const placeOrder = async (req, res) => {
   }
 };
 
-// Stripe order
+// --------------------- Stripe Order ---------------------
 const placeOrderStripe = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
-    const { origin } = req.headers;
 
     const orderData = {
       userId,
@@ -58,40 +55,7 @@ const placeOrderStripe = async (req, res) => {
     const newOrder = new orderModel(orderData);
     await newOrder.save();
 
-    // ✅ Emit to admin so they instantly see order
-    io.emit("newOrder", newOrder);
-
-    const line_items = items.map((item) => ({
-      price_data: {
-        currency: currency,
-        product_data: {
-          name: item.name,
-        },
-        unit_amount: item.price[item.size] * 100,
-      },
-      quantity: item.quantity,
-    }));
-
-    line_items.push({
-      price_data: {
-        currency: currency,
-        product_data: {
-          name: "Delivery_Charges",
-        },
-        unit_amount: Delivery_Charges * 100,
-      },
-      quantity: 1,
-    });
-
-    // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    // const session = await stripe.checkout.sessions.create({
-    //   success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
-    //   cancel_url: `${origin}/verify?success=false&orderId=${newOrder._id}`,
-    //   line_items,
-    //   mode: "payment",
-    // });
-
-    // res.json({ success: true, session_url: session.url });
+    io.emit("newOrder", newOrder); // live update to admin
 
     res.json({ success: true, message: "Stripe order created", order: newOrder });
   } catch (error) {
@@ -100,7 +64,7 @@ const placeOrderStripe = async (req, res) => {
   }
 };
 
-// Verify Stripe payment
+// --------------------- Verify Stripe ---------------------
 const verifyStripe = async (req, res) => {
   const { orderId, success, userId } = req.body;
   try {
@@ -108,7 +72,7 @@ const verifyStripe = async (req, res) => {
       await orderModel.findByIdAndUpdate(orderId, { payment: true });
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-      // ✅ Emit payment confirmation
+      // Emit payment update live
       io.emit("orderUpdated", { orderId, status: "Paid" });
 
       res.json({ success: true });
@@ -122,7 +86,7 @@ const verifyStripe = async (req, res) => {
   }
 };
 
-// Admin: all orders
+// --------------------- Admin: All Orders ---------------------
 const allOrders = async (req, res) => {
   try {
     const orders = await orderModel.find({});
@@ -133,7 +97,7 @@ const allOrders = async (req, res) => {
   }
 };
 
-// User: orders
+// --------------------- User Orders ---------------------
 const userOrders = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -145,20 +109,25 @@ const userOrders = async (req, res) => {
   }
 };
 
-// Admin: update order status
+// --------------------- Update Order Status ---------------------
 const UpdateStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
-    const updated = await orderModel.findByIdAndUpdate(
+
+    const updatedOrder = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     );
 
-    // ✅ Emit event so customer frontend updates instantly
-    io.emit("orderUpdated", updated);
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
 
-    res.json({ success: true, message: "Status Updated", order: updated });
+    // Emit live status update
+    io.emit("orderUpdated", { orderId, status: updatedOrder.status });
+
+    res.json({ success: true, message: "Status Updated", order: updatedOrder });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

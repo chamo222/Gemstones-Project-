@@ -4,18 +4,43 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { TfiPackage } from "react-icons/tfi";
 
-// Path to notification sound (place in public/assets folder)
-const notificationSound = "/assets/order_notification.mp3";
+// Place your audio file in public/assets folder
+const notificationSound = "../assets/order_notification.mp3";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [openOrderDetails, setOpenOrderDetails] = useState({});
-  const lastOrderCount = useRef(0); // Track last count for new order detection
+  const lastOrderCount = useRef(0);
+  const audioRef = useRef(null);
 
-  // Play sound function
+  // Initialize audio once
+  useEffect(() => {
+    audioRef.current = new Audio(notificationSound);
+    audioRef.current.volume = 0.5;
+
+    // Unlock audio on first user interaction
+    const unlockAudio = () => {
+      audioRef.current
+        .play()
+        .then(() => audioRef.current.pause())
+        .catch(() => {});
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
+    };
+
+    document.addEventListener("click", unlockAudio);
+    document.addEventListener("keydown", unlockAudio);
+
+    return () => {
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
+    };
+  }, []);
+
   const playNotificationSound = () => {
-    const audio = new Audio(notificationSound);
-    audio.play().catch(() => {});
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(() => {});
   };
 
   const fetchAllOrders = async () => {
@@ -31,7 +56,7 @@ const Orders = ({ token }) => {
       if (response.data.success) {
         const newOrders = response.data.orders;
 
-        // Check if new orders have arrived
+        // Play sound if new order arrived
         if (newOrders.length > lastOrderCount.current) {
           playNotificationSound();
           toast.info("🔔 New order received!", {
@@ -42,7 +67,7 @@ const Orders = ({ token }) => {
         }
 
         setOrders(newOrders);
-        lastOrderCount.current = newOrders.length; // update last count
+        lastOrderCount.current = newOrders.length;
       } else {
         toast.error(response.data.message);
       }
@@ -81,7 +106,6 @@ const Orders = ({ token }) => {
   useEffect(() => {
     fetchAllOrders();
     const intervalId = setInterval(fetchAllOrders, 30000);
-
     return () => clearInterval(intervalId);
   }, [token]);
 
@@ -162,6 +186,7 @@ const Orders = ({ token }) => {
                       </tr>
                     </tbody>
                   </table>
+
                   <div className="bg-gray-100 p-4 rounded-lg">
                     <p>
                       <span className="font-semibold text-gray-700">Name: </span>
@@ -176,9 +201,7 @@ const Orders = ({ token }) => {
                       {order.address.zipcode}
                     </p>
                     <p>
-                      <span className="font-semibold text-gray-700">
-                        Phone:{" "}
-                      </span>
+                      <span className="font-semibold text-gray-700">Phone: </span>
                       {order.address.phone}
                     </p>
                   </div>

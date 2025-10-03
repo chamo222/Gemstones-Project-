@@ -6,6 +6,8 @@ import { Server } from "socket.io";
 import cors from "cors";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
+
+// Routers
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
@@ -20,6 +22,7 @@ connectCloudinary();
 app.use(express.json());
 app.use(cors());
 
+// API Routes
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
@@ -39,10 +42,10 @@ export const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("Admin/frontend connected via WebSocket");
+  console.log("Frontend/Admin connected via WebSocket");
 });
 
-// Bind to 0.0.0.0 for Fly.io
-server.listen(port, "0.0.0.0", () => 
+// Start server
+server.listen(port, "0.0.0.0", () =>
   console.log("Server running on port " + port)
 );

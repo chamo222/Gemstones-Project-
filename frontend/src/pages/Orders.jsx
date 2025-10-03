@@ -2,124 +2,145 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaCheckCircle, FaBox, FaShippingFast, FaTruck, FaHome } from 'react-icons/fa'; // Importing React Icons
+import { FaCheckCircle, FaBox, FaShippingFast, FaTruck, FaHome } from 'react-icons/fa';
 import Title from '../components/Title';
 import Footer from "../components/Footer";
+import { io as socketClient } from 'socket.io-client';
 
 const Orders = () => {
   const { backendUrl, token, currency } = useContext(ShopContext);
-  const [orderData, setOrderData] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
+  const stages = ['Order Placed', 'Packing', 'Shipped', 'Out for Delivery', 'Delivered'];
 
-  const loadOrderData = async () => {
+  // Fetch user orders
+  const loadOrders = async () => {
+    if (!token) return;
     try {
-      if (!token) {
-        return null;
-      }
-
-      const response = await axios.post(backendUrl + '/api/order/userorders', {}, { headers: { token } });
+      const response = await axios.post(
+        `${backendUrl}/api/order/userorders`,
+        {},
+        { headers: { token } }
+      );
       if (response.data.success) {
-        let allOrdersItem = [];
-
-        response.data.orders.map((order) => {
-          order.items.map((item) => {
-            item['status'] = order.status;
-            item['payment'] = order.payment;
-            item['paymentMethod'] = order.paymentMethod;
-            item['date'] = order.date;
-            allOrdersItem.push(item);
-          });
-        });
-        setOrderData(allOrdersItem.reverse());
+        setOrders(response.data.orders.reverse());
       }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
+  // Initialize socket
   useEffect(() => {
-    loadOrderData();
+    const socket = socketClient(backendUrl);
+
+    // New order placed
+    socket.on('newOrder', (newOrder) => {
+      setOrders(prev => [newOrder, ...prev]);
+      toast.info('🔔 New order placed!');
+    });
+
+    // Order status updated
+    socket.on('orderUpdated', (updatedOrder) => {
+      setOrders(prev =>
+        prev.map(order => order._id === updatedOrder._id ? updatedOrder : order)
+      );
+    });
+
+    return () => socket.disconnect();
+  }, [backendUrl]);
+
+  useEffect(() => {
+    loadOrders();
   }, [token]);
 
-  const refreshPage = () => {
-    window.location.reload();
-  };
+  // Group items by order ID for display
+  const groupedOrders = orders.reduce((acc, order) => {
+    if (!acc[order._id]) acc[order._id] = order;
+    return acc;
+  }, {});
+
+  const openTrackingModal = (orderId) => setTrackingOrderId(orderId);
+  const closeTrackingModal = () => setTrackingOrderId(null);
 
   return (
     <section className='max-padd-container mt-24'>
       <div className='pt-6 pb-20'>
-        <Title title1={'Orders'} title2={'List'} titleStyles={'h3'} />
-        {orderData.map((item, i) => (
-          <div key={i} className='p-2 rounded-xl bg-white mt-2'>
-            <div className='text-gray-700 flex flex-col gap-4'>
-              <div className='flex gap-x-3 w-full'>
-                <div className='flexCenter p-2 bg-primary'>
-                  <img src={item.image} alt="" className='w-16 sm:w-18' />
-                </div>
-                <div className='block w-full'>
-                  <h5 className='h5 capitalize line-clamp-1'>{item.name}</h5>
-                  <div className='flex gap-x-2 sm:flex-row sm:justify-between'>
-                    <div className='text-xs'>
-                      <div className='flex items-center gap-x-2 sm:gap-x-3'>
-                        <div className='flexCenter gap-x-2'>
-                          <h5 className='medium-14'>Price:</h5>
-                          <p>{currency}{item.price[item.size]}</p>
-                        </div>
-                        <div className='flexCenter gap-x-2'>
-                          <h5 className='medium-14'>Quantity:</h5>
-                          <p>{item.quantity}</p>
-                        </div>
-                        <div className='flexCenter gap-x-2'>
-                          <h5 className='medium-14'>Size:</h5>
-                          <p>{item.size}</p>
-                        </div>
-                      </div>
-                      <div className='flex items-center gap-x-2'>
-                        <h5 className='medium-14'>Date:</h5>
-                        <p className='text-gray-400'>{new Date(item.date).toDateString()}</p>
-                      </div>
-                      <div className='flex items-center gap-x-2'>
-                        <h5 className='medium-14'>Payment:</h5>
-                        <p className='text-gray-400'>{item.paymentMethod}</p>
-                      </div>
-                    </div>
+        <Title title1='Orders' title2='List' titleStyles='h3' />
+
+        {Object.values(groupedOrders).map(order => (
+          <div key={order._id} className='p-4 rounded-xl bg-white mt-4 shadow-md border'>
+            <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4'>
+              <div>
+                <p className='text-gray-500 text-sm'>Order ID: <span className='font-medium'>{order._id.slice(-6).toUpperCase()}</span></p>
+                <p className='text-gray-500 text-sm'>Date: {new Date(order.date).toLocaleDateString()}</p>
+              </div>
+              <button
+                onClick={() => openTrackingModal(order._id)}
+                className='bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-sm'
+              >
+                Track Order
+              </button>
+            </div>
+
+            <div className='mt-2 space-y-2'>
+              {order.items.map((item, idx) => (
+                <div key={idx} className='flex items-center gap-3 border-b py-2'>
+                  <img src={item.image} alt={item.name} className='w-16 h-16 object-cover rounded-md' />
+                  <div className='flex flex-col text-sm'>
+                    <span className='font-medium'>{item.name}</span>
+                    <span>Size: {item.size}</span>
+                    <span>Qty: {item.quantity}</span>
+                    <span>Price: {currency}{item.price[item.size]}</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Order Progress Bar Under Order Details */}
-              <div className='order-progress-bar'>
-                <div className='progress-icons'>
-                  {['Order Placed', 'Packing', 'Shipped', 'Out for Delivery', 'Delivered'].map((stage, index) => (
-                    <div
-                      key={index}
-                      className={`progress-icon ${item.status === stage ? 'active' : ''}`}
-                    >
-                      {/* Use appropriate icons */}
-                      {stage === 'Order Placed' && <FaCheckCircle />}
-                      {stage === 'Packing' && <FaBox />}
-                      {stage === 'Shipped' && <FaShippingFast />}
-                      {stage === 'Out for Delivery' && <FaTruck />}
-                      {stage === 'Delivered' && <FaHome />}
-                      <p>{stage}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className='progress-lines'>
-                  {['Order Placed', 'Packing', 'Shipped', 'Out for Delivery', 'Delivered'].map((stage, index) => (
-                    <div
-                      key={index}
-                      className={`progress-line ${item.status === stage || item.status > stage ? 'active' : ''}`}
-                    />
-                  ))}
-                </div>
-                <button className="order-tracking-button" onClick={refreshPage}>
-                  Refresh Order
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         ))}
+
+        {/* Tracking Modal */}
+        {trackingOrderId && (() => {
+          const trackingOrder = orders.find(o => o._id === trackingOrderId);
+          if (!trackingOrder) return null;
+          return (
+            <div className='fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white rounded-xl p-6 w-11/12 sm:w-96 relative'>
+                <button
+                  className='absolute top-3 right-3 text-gray-500 hover:text-gray-700'
+                  onClick={closeTrackingModal}
+                >
+                  ✕
+                </button>
+                <h3 className='font-semibold text-lg mb-4'>Track Order: {trackingOrder._id.slice(-6).toUpperCase()}</h3>
+                <div className='space-y-4'>
+                  {stages.map((stage, idx) => (
+                    <div key={idx} className='flex items-center gap-3'>
+                      <div className={`w-6 h-6 rounded-full flexCenter ${stages.indexOf(trackingOrder.status) >= idx ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
+                        {stage === 'Order Placed' && <FaCheckCircle />}
+                        {stage === 'Packing' && <FaBox />}
+                        {stage === 'Shipped' && <FaShippingFast />}
+                        {stage === 'Out for Delivery' && <FaTruck />}
+                        {stage === 'Delivered' && <FaHome />}
+                      </div>
+                      <span className={`${stages.indexOf(trackingOrder.status) >= idx ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                        {stage}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={closeTrackingModal}
+                  className='mt-6 bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors w-full'
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
       <Footer />
     </section>

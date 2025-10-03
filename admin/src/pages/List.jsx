@@ -2,18 +2,18 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { backend_url, currency } from '../App'
 import { toast } from 'react-toastify'
-import { TbTrash } from 'react-icons/tb'
+import { TbTrash, TbEdit } from 'react-icons/tb' // ✅ added Edit icon
+import { useNavigate } from 'react-router-dom'   // ✅ for navigation to edit page
 
-const List = ({token}) => {
-
+const List = ({ token }) => {
   const [list, setList] = useState([])
+  const navigate = useNavigate()
 
   const fetchList = async () => {
     try {
       const response = await axios.get(backend_url + '/api/product/list')
       if (response.data.success) {
         setList(response.data.products)
-
       } else {
         toast.error(response.data.message)
       }
@@ -23,15 +23,17 @@ const List = ({token}) => {
     }
   }
 
-
   const removeProduct = async (id) => {
     try {
-      const response = await axios.post(backendUrl + '/api/product/remove', { id }, { headers: { token } })
+      const response = await axios.post(
+        backend_url + '/api/product/remove',   // ✅ FIXED here
+        { id },
+        { headers: { token } }
+      )
       if (response.data.success) {
         toast.success(response.data.message)
         await fetchList()
-      }
-      else {
+      } else {
         toast.error(response.data.message)
       }
     } catch (error) {
@@ -40,6 +42,10 @@ const List = ({token}) => {
     }
   }
 
+  // Navigate to edit page with product id
+  const editProduct = (id) => {
+    navigate(`/edit/${id}`)
+  }
 
   useEffect(() => {
     fetchList()
@@ -48,23 +54,46 @@ const List = ({token}) => {
   return (
     <div className='px-2 sm:px-8'>
       <div className='flex flex-col gap-2'>
-        <div className='grid grid-cols-[1fr_3fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-3 rounded'>
+        <div className='grid grid-cols-[1fr_3fr_1fr_1fr_1fr_1fr] items-center py-1 px-2 bg-white bold-14 sm:bold-15 mb-3 rounded'>
           <h5>Image</h5>
           <h5>Name</h5>
           <h5>Category</h5>
           <h5>Price</h5>
+          <h5>Edit</h5>
           <h5>Remove</h5>
         </div>
+
         {/* Food List */}
         {list.map((item) => (
-          <div key={item._id} className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr] md:grid-cols-[1fr_3fr_1fr_1fr_1fr] items-center gap-2 p-1 bg-white rounded-xl'>
+          <div
+            key={item._id}
+            className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] md:grid-cols-[1fr_3fr_1fr_1fr_1fr_1fr] items-center gap-2 p-1 bg-white rounded-xl'
+          >
             <img src={item.image} alt="" className='w-12 rounded-lg' />
             <h5 className='text-sm font-semibold'>{item.name}</h5>
             <p className='font-semibold'>{item.category}</p>
+
             {/* price for first size */}
-            <div className='text-sm font-semibold'>{currency}{Object.values(item.price)[0]}</div>
-            <div><TbTrash onClick={()=>removeProduct(item._id)} 
-            className='text-right md:text-center cursor-pointer text-lg' /></div>
+            <div className='text-sm font-semibold'>
+              {currency}
+              {Object.values(item.price)[0]}
+            </div>
+
+            {/* Edit Button */}
+            <div>
+              <TbEdit
+                onClick={() => editProduct(item._id)}
+                className='text-center cursor-pointer text-lg text-blue-500'
+              />
+            </div>
+
+            {/* Delete Button */}
+            <div>
+              <TbTrash
+                onClick={() => removeProduct(item._id)}
+                className='text-center cursor-pointer text-lg text-red-500'
+              />
+            </div>
           </div>
         ))}
       </div>
