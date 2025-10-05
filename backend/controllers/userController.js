@@ -68,6 +68,34 @@ const loginUser = async (req, res) => {
     }
 }
 
+// Fetch user orders with customer info
+const getUserOrders = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    // Fetch orders
+    const orders = await orderModel.find({ userId }).lean();
+
+    // Fetch user info
+    const user = await userModel.findById(userId).lean();
+
+    // Attach customer info to each order
+    const ordersWithCustomer = orders.map((order) => ({
+      ...order,
+      customer: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "N/A",
+        address: order.address || user.address || "N/A",
+      },
+    }));
+
+    res.json({ success: true, orders: ordersWithCustomer });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // Admin login route
 const adminLogin = async (req, res) => {
@@ -87,4 +115,4 @@ const adminLogin = async (req, res) => {
 }
 
 
-export { registerUser, loginUser, adminLogin }
+export { registerUser, loginUser, adminLogin, getUserOrders }

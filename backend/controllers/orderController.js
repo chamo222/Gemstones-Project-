@@ -125,9 +125,43 @@ const UpdateStatus = async (req, res) => {
     }
 
     // Emit live status update
-    io.emit("orderUpdated", { orderId, status: updatedOrder.status });
+    io.emit("orderUpdated", updatedOrder);
 
     res.json({ success: true, message: "Status Updated", order: updatedOrder });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// --------------------- Revenue Stats (No Auth Needed) ---------------------
+const getRevenueStats = async (req, res) => {
+  try {
+    const orders = await orderModel.find({});
+
+    const totalOrders = orders.length;
+    const orderPlaced = orders.filter(o => o.status === "Order Placed").length;
+    const preparingOrders = orders.filter(o => o.status === "Preparing").length;
+    const readyOrders = orders.filter(o => o.status === "Ready").length;
+    const deliveredOrders = orders.filter(o => o.status === "Delivered").length;
+    const cancelledOrders = orders.filter(o => o.status === "Cancelled").length;
+
+    const totalSales = orders
+      .filter(o => o.status === "Delivered" && o.payment)
+      .reduce((acc, curr) => acc + curr.amount, 0);
+
+    res.json({
+      success: true,
+      stats: {
+        totalOrders,
+        orderPlaced,
+        preparingOrders,
+        readyOrders,
+        deliveredOrders,
+        cancelledOrders,
+        totalSales,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -141,4 +175,5 @@ export {
   allOrders,
   userOrders,
   UpdateStatus,
+  getRevenueStats, // <-- export revenue stats
 };

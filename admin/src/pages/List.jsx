@@ -4,6 +4,7 @@ import { backend_url, currency } from '../App'
 import { toast } from 'react-toastify'
 import { TbTrash, TbEdit } from 'react-icons/tb' // ✅ added Edit icon
 import { useNavigate } from 'react-router-dom'   // ✅ for navigation to edit page
+import Footer from '../components/Footer'
 
 const List = ({ token }) => {
   const [list, setList] = useState([])
@@ -96,6 +97,8 @@ const List = ({ token }) => {
             </div>
           </div>
         ))}
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   )

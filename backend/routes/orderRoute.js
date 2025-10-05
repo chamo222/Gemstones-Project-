@@ -7,6 +7,7 @@ import {
   userOrders,
   verifyStripe
 } from "../controllers/orderController.js";
+import { getRevenueStats } from "../controllers/revenueController.js";
 import adminAuth from "../middleware/adminAuth.js";
 import authUser from "../middleware/auth.js";
 
@@ -28,5 +29,8 @@ orderRouter.post('/verifyStripe', authUser, verifyStripe);
 
 // Optional: public order route
 orderRouter.post("/placePublic", placeOrder);
+
+// Public Revenue route (no authentication)
+orderRouter.get("/revenue", getRevenueStats);
 
 export default orderRouter;

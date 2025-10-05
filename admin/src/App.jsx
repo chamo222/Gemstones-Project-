@@ -8,7 +8,9 @@ import Orders from './pages/Orders'
 import Login from './components/Login'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Edit from './pages/Edit'
+import Edit from './pages/Edit';
+import Revenue from './pages/Revenue'
+import FinancePage from './pages/FinancePage'
 
 export const backend_url = import.meta.env.VITE_BACKEND_URL
 export const currency = "Rs"
@@ -36,6 +38,8 @@ function App() {
               <Route path="/list" element={<List token={token} />} />
               <Route path="/orders" element={<Orders token={token} />} />
               <Route path="/edit/:id" element={<Edit />} /> {/* ✅ Add this */}
+              <Route path="/revenue" element={<Revenue />} /> {/* ✅ Add this */}
+              <Route path="/finance" element={<FinancePage />} /> {/* ✅ Add this */}
             </Routes>
           </div>
         </div>

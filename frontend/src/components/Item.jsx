@@ -3,7 +3,6 @@ import { FaStar, FaStarHalfStroke } from "react-icons/fa6"
 import { TbShoppingBagPlus } from "react-icons/tb"
 import { ShopContext } from '../context/ShopContext'
 
-
 const Item = ({ food }) => {
 
   const { currency, addToCart } = useContext(ShopContext)
@@ -12,11 +11,16 @@ const Item = ({ food }) => {
   return (
     <div className='rounded-xl bg-white relative'>
       {/* photo */}
-      <div className='flexCenter m-6 rounded-full absolute left-0 right-0 -top-[111px]'>
-        <img src={food.image} alt="" height={177} width={177} className='object-contain aspect-square rounded-xl' />
+      <div className='flexCenter p-6'>
+        <img
+          src={food.image}
+          alt=""
+          className='object-contain aspect-square h-40 w-40 rounded-xl'
+        />
       </div>
+
       {/* info */}
-      <div className='mx-4 bg-white pt-20'>
+      <div className='mx-4 bg-white'>
         {/* title and description */}
         <div className='py-3'>
           <h4 className='bold-16 line-clamp-1 mb-1'>{food.name}</h4>
@@ -48,7 +52,7 @@ const Item = ({ food }) => {
               </button>
             ))}
           </div>
-          <button onClick={()=>addToCart(food._id, size)} className='flexCenter gap-x-1 text-[18px] bg-secondary text-white rounded-sm p-[3px]'><TbShoppingBagPlus /></button>
+          <button onClick={() => addToCart(food._id, size)} className='flexCenter gap-x-1 text-[18px] bg-secondary text-white rounded-sm p-[3px]'><TbShoppingBagPlus /></button>
         </div>
         {/* order info (temporary) */}
         <div className='flexBetween rounded-xl pb-3 text-[13px] font-semibold'>
@@ -64,7 +68,6 @@ const Item = ({ food }) => {
           <hr className='h-8 w-[1px] bg-tertiary/10 border-none' />
           <div className='flex flex-col gap-1'>
             <h5>Price</h5>
-            {/* Dynamically update the price */}
             <p className='text-xs text-secondary'>
               {currency}{food.price[size]}
             </p>

@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from "./components/Header";
 import Contact from "./pages/Contact";
 import Menu from "./pages/Menu";
+import About from "./pages/About";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </main>
   )

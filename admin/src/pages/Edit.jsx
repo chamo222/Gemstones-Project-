@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import upload_icon from "../assets/upload_icon.png";
 import { TbTrash } from "react-icons/tb";
 import { FaPlus } from "react-icons/fa6";
+import Footer from "../components/Footer";
 
 const Edit = () => {
   const { id } = useParams(); // productId from route
@@ -226,6 +227,8 @@ const Edit = () => {
           Update Product
         </button>
       </form>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

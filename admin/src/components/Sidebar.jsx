@@ -23,6 +23,14 @@ const Sidebar = ({ token, setToken }) => {
                         <MdFactCheck />
                         <div className='hidden lg:flex'>Orders</div>
                     </NavLink>
+                    <NavLink to={'/revenue'} className={({ isActive }) => isActive ? "active-link" : "flexStart gap-x-2 sm:pl-12 p-5 medium-15 cursor-pointer h-10 rounded-xl"}>
+                        <MdFactCheck />
+                        <div className='hidden lg:flex'>Revenue</div>
+                    </NavLink>
+                    <NavLink to={'/finance'} className={({ isActive }) => isActive ? "active-link" : "flexStart gap-x-2 sm:pl-12 p-5 medium-15 cursor-pointer h-10 rounded-xl"}>
+                        <MdFactCheck />
+                        <div className='hidden lg:flex'>Finance</div>
+                    </NavLink>
                 </div>
                 {/* logout button at the bottom */}
                 <div className='max-sm:ml-5 sm:mt-80'>

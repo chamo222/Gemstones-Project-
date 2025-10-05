@@ -6,6 +6,7 @@ import { FaPlus } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { backend_url } from "../App";
 import * as XLSX from "xlsx";
+import Footer from "../components/Footer";
 
 const Add = ({ token }) => {
   const [image, setImage] = useState(null);
@@ -73,7 +74,6 @@ const Add = ({ token }) => {
           formData.append("popular", popular === "true" || popular === true);
           formData.append("prices", JSON.stringify(pricesArray));
 
-          // Only attach image if one is selected
           if (image) formData.append("image", image);
 
           await axios.post(`${backend_url}/api/product/add`, formData, {
@@ -121,65 +121,74 @@ const Add = ({ token }) => {
 
   return (
     <div className="px-2 sm:px-8">
-      <form onSubmit={onSubmitHandler} className="flex flex-col gap-y-3 medium-14 lg:w-[777px]">
+      <form
+        onSubmit={onSubmitHandler}
+        className="flex flex-col gap-y-6 bg-white shadow-sm rounded-xl p-6 lg:w-[777px] mx-auto"
+      >
         {/* Excel Import */}
         <div className="flex flex-col gap-y-2">
-          <h5 className="h5">Import Excel</h5>
+          <h5 className="font-semibold text-gray-800">Import from Excel</h5>
           <input
             type="file"
             accept=".xlsx, .xls"
             onChange={handleExcelImport}
-            className="px-2 py-1 border rounded"
+            className="px-3 py-2 border rounded-lg cursor-pointer text-sm text-gray-600"
           />
         </div>
 
         {/* Product Name */}
         <div className="w-full">
-          <h5 className="h5">Product Name</h5>
+          <h5 className="font-semibold text-gray-800">Product Name</h5>
           <input
             onChange={(e) => setName(e.target.value)}
             value={name}
             type="text"
-            placeholder="Write here.."
-            className="px-3 py-1.5 ring-1 ring-slate-900/10 rounded bg-white mt-1 w-full max-w-lg"
+            placeholder="Enter product name"
+            className="px-4 py-2 ring-1 ring-gray-300 rounded-lg bg-white mt-1 w-full focus:ring-2 focus:ring-indigo-400 focus:outline-none"
           />
         </div>
 
         {/* Product Description */}
         <div className="w-full">
-          <h5 className="h5">Product Description</h5>
+          <h5 className="font-semibold text-gray-800">Product Description</h5>
           <textarea
             onChange={(e) => setDescription(e.target.value)}
             value={description}
             rows={5}
-            placeholder="Write here.."
-            className="px-3 py-1.5 ring-1 ring-slate-900/10 rounded bg-white mt-1 w-full max-w-lg"
+            placeholder="Describe your product (ingredients, details, etc.)"
+            className="px-4 py-2 ring-1 ring-gray-300 rounded-lg bg-white mt-1 w-full focus:ring-2 focus:ring-indigo-400 focus:outline-none"
           />
         </div>
 
         {/* Category + Image */}
-        <div className="flex items-end gap-x-6">
-          <div>
-            <h5 className="h5">Category</h5>
+        <div className="flex items-center justify-between gap-x-6">
+          <div className="flex-1">
+            <h5 className="font-semibold text-gray-800">Category</h5>
             <select
               onChange={(e) => setCategory(e.target.value)}
               value={category}
-              className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white mt-1 sm:w-full text-gray-30"
+              className="px-4 py-2 ring-1 ring-gray-300 rounded-lg bg-white mt-1 w-full focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             >
               <option value="Curry">Curry</option>
               <option value="Pizza">Pizza</option>
               <option value="Rice">Rice</option>
-              <option value="Deserts">Deserts</option>
+              <option value="Deserts">Desserts</option>
               <option value="Drinks">Drinks</option>
               <option value="Fruits">Fruits</option>
             </select>
           </div>
-          <div className="flex gap-2 pt-2">
-            <label htmlFor="image">
+
+          {/* Image Upload */}
+          <div className="flex flex-col items-center">
+            <h5 className="font-semibold text-gray-800">Upload Image</h5>
+            <label
+              htmlFor="image"
+              className="mt-2 cursor-pointer flex items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 transition"
+            >
               <img
                 src={image ? URL.createObjectURL(image) : upload_icon}
-                alt=""
-                className="w-14 h-14 aspect-square object-cover ring-1 ring-slate-900/5 bg-white rounded-lg"
+                alt="preview"
+                className="w-full h-full object-cover rounded-lg"
               />
               <input
                 type="file"
@@ -194,28 +203,28 @@ const Add = ({ token }) => {
 
         {/* Sizes */}
         <div>
-          <h5 className="h5">Size and Pricing</h5>
+          <h5 className="font-semibold text-gray-800">Sizes & Pricing</h5>
           {prices.map((item, index) => (
-            <div key={index} className="flex items-end gap-4 mt-2">
+            <div key={index} className="flex items-center gap-4 mt-2">
               <input
                 onChange={(e) => handleSizePriceChange(index, "size", e.target.value)}
                 value={item.size}
                 type="text"
                 placeholder="(S, M, L)"
-                className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white w-20"
+                className="px-3 py-2 ring-1 ring-gray-300 rounded-lg bg-white w-24 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
               />
               <input
                 onChange={(e) => handleSizePriceChange(index, "price", e.target.value)}
                 value={item.price}
                 type="number"
-                placeholder="Price"
+                placeholder="Enter price"
                 min={0}
-                className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white w-20"
+                className="px-3 py-2 ring-1 ring-gray-300 rounded-lg bg-white w-32 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
               />
               <button
                 onClick={() => removeSizePrice(index)}
                 type="button"
-                className="text-red-500 !p-2 text-xl"
+                className="text-red-500 hover:text-red-700 p-2 text-xl"
               >
                 <TbTrash />
               </button>
@@ -224,33 +233,39 @@ const Add = ({ token }) => {
           <button
             onClick={addSizePrice}
             type="button"
-            className="btn-secondary !rounded !text-xs flexCenter gap-x-2 mt-4 !px-3 !py-1"
+            className="btn-secondary flex items-center gap-x-2 mt-4 px-4 py-2 rounded-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
           >
-            <FaPlus /> Add Sizing
+            <FaPlus /> Add Size
           </button>
         </div>
 
         {/* Popular */}
-        <div className="flexStart gap-2 my-2">
+        <div className="flex items-center gap-2 my-2">
           <input
             onChange={() => setPopular((prev) => !prev)}
             type="checkbox"
             checked={popular}
             id="popular"
+            className="w-4 h-4 accent-indigo-500"
           />
-          <label htmlFor="popular" className="cursor-pointer">
-            Add to popular
+          <label htmlFor="popular" className="cursor-pointer text-gray-700">
+            Mark as Popular
           </label>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          className="btn-dark !rounded mt-3 max-w-44 sm:w-full"
+          className="btn-dark bg-indigo-600 text-white py-2 rounded-lg shadow hover:bg-indigo-700 transition mt-3 max-w-44 sm:w-full"
         >
-          {excelData.length > 0 ? `Submit ${excelData.length} Products` : "Add Product"}
+          {excelData.length > 0
+            ? `Submit ${excelData.length} Products`
+            : "Add Product"}
         </button>
       </form>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
