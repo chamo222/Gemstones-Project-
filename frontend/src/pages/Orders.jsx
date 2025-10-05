@@ -6,9 +6,6 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaFileDownload,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaEnvelope,
 } from "react-icons/fa";
 import Title from "../components/Title";
 import Footer from "../components/Footer";
@@ -28,6 +25,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [trackingOrderId, setTrackingOrderId] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const stages = [
     "Order Placed",
     "Preparing",
@@ -60,21 +58,28 @@ const Orders = () => {
 
     socket.on("newOrder", (newOrder) => {
       setOrders((prev) => [newOrder, ...prev]);
-      toast.info(
-        `🛒 New order placed! Order ID: ${newOrder._id.slice(-6).toUpperCase()}`
-      );
+      toast.info(`🛒 New order placed! Order ID: ${newOrder._id.slice(-6).toUpperCase()}`);
     });
 
     socket.on("orderUpdated", (updatedOrder) => {
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        )
+        prev.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
       );
-      if (updatedOrder.status === "Cancelled") {
-        toast.error(
-          `❌ Order ${updatedOrder._id.slice(-6).toUpperCase()} has been cancelled.`
-        );
+
+      const orderIdShort = updatedOrder._id.slice(-6).toUpperCase();
+      const statusMessages = {
+        "Order Placed": `Your order #${orderIdShort} has been placed successfully!`,
+        Packing: `🥘 Your order #${orderIdShort} is preparing — we’ll notify you once it’s ready!`,
+        "Shipped": `🧾 Your order #${orderIdShort} is ready for Delivery`,
+        "Out for Delivery": `🚚 Your order #${orderIdShort} is on the way!`,
+        Delivered: `🎉 Your order #${orderIdShort} has been successfully delivered!`,
+        Cancelled: `❌ Your order #${orderIdShort} has been cancelled.`,
+      };
+
+      const message = statusMessages[updatedOrder.status];
+      if (message) {
+        if (updatedOrder.status === "Cancelled") toast.error(message);
+        else toast.success(message);
       }
     });
 
@@ -88,7 +93,6 @@ const Orders = () => {
   const openTrackingModal = (orderId) => setTrackingOrderId(orderId);
   const closeTrackingModal = () => setTrackingOrderId(null);
 
-  // 🧾 Improved Invoice Design
   const generateInvoice = (order) => {
     const invoiceElement = document.createElement("div");
     invoiceElement.style.width = "700px";
@@ -102,7 +106,7 @@ const Orders = () => {
     invoiceElement.innerHTML = `
       <div style="text-align:center; margin-bottom: 25px;">
         <h1 style="color:#ff6600; margin:0;">The Dias Restaurant</h1>
-        <p style="margin:4px 0; color:#555;">394/3 Kirillawala,Kadawatha 11850, Sri Lanka</p>
+        <p style="margin:4px 0; color:#555;">394/3 Kirillawala, Kadawatha, Sri Lanka</p>
         <p style="margin:0; color:#555;">Phone: +94 77 123 4567 | Email: thedias@gmail.com</p>
       </div>
       <hr style="margin: 10px 0; border: none; border-top: 2px solid #ff6600;">
@@ -149,15 +153,11 @@ const Orders = () => {
 
       <p style="text-align:right; margin-top:15px; font-size:15px;">
         <strong>Total:</strong> ${currency}${order.items
-          .reduce(
-            (sum, item) => sum + item.price[item.size] * item.quantity,
-            0
-          )
+          .reduce((sum, item) => sum + item.price[item.size] * item.quantity, 0)
           .toFixed(2)}
       </p>
 
       <hr style="margin:15px 0; border:none; border-top:1px dashed #ccc;">
-
       <div style="margin-top: 20px; text-align:center;">
         <p style="font-size:13px; color:#444;">Thank you for dining with us!</p>
         <p style="font-size:12px; color:#777;">Visit us again at www.thediasrestaurant.lk</p>
@@ -165,7 +165,6 @@ const Orders = () => {
     `;
 
     document.body.appendChild(invoiceElement);
-
     html2canvas(invoiceElement, { scale: 2 }).then((canvas) => {
       const pdf = new jsPDF("p", "pt", "a4");
       const imgData = canvas.toDataURL("image/png");
@@ -207,11 +206,9 @@ const Orders = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className={`p-4 rounded-xl bg-white mt-4 shadow-md border relative ${
-                    order.status === "Cancelled" ? "opacity-70" : ""
-                  }`}
+                  className="p-4 rounded-xl bg-white mt-4 shadow-md border relative"
                 >
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                     <div>
                       <p className="text-gray-500 text-sm">
                         Order ID:{" "}
@@ -224,41 +221,38 @@ const Orders = () => {
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 items-center sm:items-end">
-                      {order.status !== "Cancelled" &&
-                        order.status !== "Delivered" && (
-                          <button
-                            onClick={() => openTrackingModal(order._id)}
-                            className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-sm"
-                          >
-                            Track Order
-                          </button>
-                        )}
-
-                      {order.status === "Delivered" && (
-                        <div className="flex flex-col items-center mt-2 space-y-2">
-                          <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-green-500 text-white text-sm font-semibold shadow-sm">
+                    {/* Right-side buttons aligned with order details */}
+                    <div className="flex flex-col items-end justify-center sm:justify-start">
+                      {order.status === "Delivered" ? (
+                        <div className="flex flex-col items-end space-y-2">
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-500 text-white text-sm font-semibold shadow-sm">
                             <FaCheckCircle className="w-4 h-4 mr-1" />
                             Delivered
                           </div>
                           <button
                             onClick={() => generateInvoice(order)}
-                            className="flex items-center justify-center gap-2 bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600 text-xs transition shadow-sm"
+                            className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600 text-xs transition shadow-sm"
                           >
                             <FaFileDownload className="w-3 h-3" /> Download Invoice
                           </button>
                         </div>
-                      )}
-
-                      {order.status === "Cancelled" && (
-                        <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-500 text-white text-sm font-semibold">
+                      ) : order.status === "Cancelled" ? (
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-500 text-white text-sm font-semibold">
                           <FaTimesCircle className="w-4 h-4 mr-1" />
                           Cancelled
                         </div>
+                      ) : (
+                        <button
+                          onClick={() => openTrackingModal(order._id)}
+                          className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                        >
+                          Track Order
+                        </button>
                       )}
                     </div>
                   </div>
 
+                  {/* Items List */}
                   <div className="mt-2 space-y-2">
                     {order.items.map((item, idx) => (
                       <div
@@ -282,55 +276,6 @@ const Orders = () => {
                       </div>
                     ))}
                   </div>
-
-                  {/* Tracking Modal */}
-                  {trackingOrderId === order._id && (
-                    <motion.div
-                      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <motion.div
-                        className="bg-white p-6 rounded-xl shadow-xl w-96"
-                        initial={{ scale: 0.9 }}
-                        animate={{ scale: 1 }}
-                      >
-                        <h3 className="text-lg font-semibold mb-4 text-center text-orange-600">
-                          Track Your Order
-                        </h3>
-                        <div className="space-y-3">
-                          {stages.map((stage, index) => (
-                            <div
-                              key={index}
-                              className={`flex items-center gap-2 ${
-                                stages.indexOf(order.status) >= index
-                                  ? "text-green-600"
-                                  : "text-gray-400"
-                              }`}
-                            >
-                              <FaCheckCircle className="w-4 h-4" />
-                              <span>{stage}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-4 flex flex-col gap-2">
-                          <button
-                            onClick={() => generateInvoice(order)}
-                            className="flex items-center justify-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 text-sm transition"
-                          >
-                            <FaFileDownload className="w-4 h-4" /> Download Invoice
-                          </button>
-                          <button
-                            onClick={closeTrackingModal}
-                            className="bg-gray-300 text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-400 text-sm transition"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

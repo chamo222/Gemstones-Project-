@@ -55,36 +55,30 @@ const PlaceOrder = () => {
       }
 
       switch (method) {
+        // api for COD method
         case 'cod':
           const response = await axios.post(backendUrl + '/api/order/place', orderData, { headers: { token } })
+          console.log(response.data)
           if (response.data.success) {
             setCartItems({})
-            toast.success('✅ Your order has been placed successfully!', {
-              position: "top-right",
-              autoClose: 4000,
-              theme: "colored",
-            })
             navigate('/orders')
-          } else {
+          }
+          else {
             toast.error(response.data.message)
           }
           break;
-
+        // api for stripe method
         case 'stripe':
           const responseStripe = await axios.post(backendUrl + '/api/order/stripe', orderData, { headers: { token } })
           if (responseStripe.data.success) {
             const { session_url } = responseStripe.data
-            toast.success('✅ Your order is being processed! Redirecting to payment...', {
-              position: "top-right",
-              autoClose: 4000,
-              theme: "colored",
-            })
             window.location.replace(session_url)
-          } else {
+          }
+          else {
             toast.error(responseStripe.data.message)
           }
-          break;
 
+          break;
         default:
           break;
       }
@@ -96,10 +90,11 @@ const PlaceOrder = () => {
 
   return (
     <section className='max-padd-container mt-24'>
+      {/* Container */}
       <form onSubmit={onSubmitHandler} className='py-6'>
         <div className='flex flex-col xl:flex-row gap-20 xl:gap-28'>
 
-          {/* Left side delivery information */}
+          {/* Left side  delivery information */}
           <div className='flex flex-1 flex-col gap-3 text-[95%]'>
             <Title title1={'Delivery'} title2={'Information'} title1Styles={'h3'} />
             <div className='flex gap-3'>
@@ -112,12 +107,18 @@ const PlaceOrder = () => {
             <div className='flex gap-3'>
               <input required onChange={onChangeHandler} value={formData.city} type="text" name='city' placeholder='City' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
               <input required onChange={onChangeHandler} value={formData.zipcode} type="text" name='zipcode' placeholder='Zip Code' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
+              {/*<input required onChange={onChangeHandler} value={formData.state} type="text" name='state' placeholder='State' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
+            </div>
+            <div className='flex gap-3'>
+              {/*<input required onChange={onChangeHandler} value={formData.zipcode} type="text" name='zipcode' placeholder='Zip Code' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
+              {/* <input required onChange={onChangeHandler} value={formData.country} type="text" name='country' placeholder='Country' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
             </div>
           </div>
 
-          {/* Right side Cart total */}
+          {/* Right side  Cart total */}
           <div className='flex flex-1 flex-col'>
             <CartTotal />
+            {/* payment method */}
             <div className='my-6'>
               <h3 className='bold-20 mb-5'>Payment <span className='text-secondary'>Method</span></h3>
               <div className='flex gap-3'>
