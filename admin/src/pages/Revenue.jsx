@@ -88,7 +88,7 @@ const Revenue = () => {
     { title: "Out for Delivery", value: stats.outForDeliveryOrders, icon: <FaShippingFast />, bg: "bg-teal-100", color: "text-teal-500" },
     { title: "Delivered", value: stats.deliveredOrders, icon: <FaCheckCircle />, bg: "bg-green-100", color: "text-green-500" },
     { title: "Cancelled", value: stats.cancelledOrders, icon: <FaTimesCircle />, bg: "bg-red-100", color: "text-red-500" },
-    { title: "Total Sales", value: `LKR ${stats.totalSales.toLocaleString()}`, icon: <FaMoneyBillWave />, bg: "bg-teal-50", color: "text-teal-500", fullWidth: true },
+    { title: "Total Sales", value: `$ ${stats.totalSales.toLocaleString()}`, icon: <FaMoneyBillWave />, bg: "bg-teal-50", color: "text-teal-500", fullWidth: true },
   ];
 
   const flowData = [

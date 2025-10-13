@@ -13,7 +13,7 @@ const Add = ({ token }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [prices, setPrices] = useState([]); // Stores size-price pairs dynamically
-  const [category, setCategory] = useState("Curry");
+  const [category, setCategory] = useState("Garnet");
   const [popular, setPopular] = useState(false);
   const [excelData, setExcelData] = useState([]); // For Excel import
 
@@ -70,7 +70,7 @@ const Add = ({ token }) => {
           const formData = new FormData();
           formData.append("name", name);
           formData.append("description", description || "");
-          formData.append("category", category || "Curry");
+          formData.append("category", category || "Garnet");
           formData.append("popular", popular === "true" || popular === true);
           formData.append("prices", JSON.stringify(pricesArray));
 
@@ -169,12 +169,12 @@ const Add = ({ token }) => {
               value={category}
               className="px-4 py-2 ring-1 ring-gray-300 rounded-lg bg-white mt-1 w-full focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             >
-              <option value="Curry">Curry</option>
-              <option value="Pizza">Pizza</option>
-              <option value="Rice">Rice</option>
-              <option value="Deserts">Desserts</option>
-              <option value="Drinks">Drinks</option>
-              <option value="Fruits">Fruits</option>
+              <option value="Garnet">Garnet</option>
+              <option value="Sobalt Spinel">Sobalt Spinel</option>
+              <option value="Chrysoberyl">Chrysoberyl</option>
+              <option value="Aquamarine">Aquamarine</option>
+              <option value="Andalusite">Andalusite</option>
+              <option value="Amethyst">Amethyst</option>
             </select>
           </div>
 

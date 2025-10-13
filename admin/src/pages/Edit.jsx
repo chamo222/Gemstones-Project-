@@ -17,7 +17,7 @@ const Edit = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [prices, setPrices] = useState([]);
-  const [category, setCategory] = useState("Curry");
+  const [category, setCategory] = useState("Garnet");
   const [popular, setPopular] = useState(false);
   const [existingImage, setExistingImage] = useState("");
 
@@ -139,12 +139,12 @@ const Edit = () => {
               value={category}
               className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white mt-1 sm:w-full text-gray-30"
             >
-              <option value="Curry">Curry</option>
-              <option value="Pizza">Pizza</option>
-              <option value="Rice">Rice</option>
-              <option value="Deserts">Deserts</option>
-              <option value="Drinks">Drinks</option>
-              <option value="Fruits">Fruits</option>
+              <option value="Garnet">Garnet</option>
+              <option value="Sobalt Spinel">Sobalt Spinel</option>
+              <option value="Chrysoberyl">Chrysoberyl</option>
+              <option value="Aquamarine">Aquamarine</option>
+              <option value="Andalusite">Andalusite</option>
+              <option value="Amethyst">Amethyst</option>
             </select>
           </div>
 

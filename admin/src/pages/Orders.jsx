@@ -198,7 +198,7 @@ const Orders = ({ token }) => {
                     className="p-2 rounded-lg border border-gray-300 shadow-sm text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
                   >
                     <option value="Order Placed">Order Placed</option>
-                    <option value="Packing">Preparing</option>
+                    <option value="Packing">Seller to Pack</option>
                     <option value="Shipped">Ready</option>
                     <option value="Out for Delivery">Out for Delivery</option>
                     <option value="Delivered">Delivered</option>

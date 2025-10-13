@@ -3,28 +3,42 @@ import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Process from '../components/Process';
 import PopularFoods from '../components/PopularFoods';
-import coverBanner1 from "../assets/cover-banner-1.jpg";
-import coverBanner2 from "../assets/cover-banner-2.jpg";
+import coverBanner1 from "../assets/gem-display1.jpg";
+import coverBanner2 from "../assets/gem-display2.jpg";
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
+import { GiCutDiamond } from 'react-icons/gi'; // Diamond loader
 
-// Simple loading spinner
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-screen">
-    <div className="w-12 h-12 border-4 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+// 💎 Diamond-style loader
+const LoadingDiamond = () => (
+  <div className="flex flex-col items-center justify-center h-screen text-center w-full">
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0.7 }}
+      animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <GiCutDiamond className="text-[#4169E1] text-6xl drop-shadow-md" />
+    </motion.div>
+    <motion.p
+      className="mt-5 text-gray-600 text-lg font-medium tracking-wide"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.3 }}
+    >
+      Preparing your experience...
+    </motion.p>
   </div>
 );
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
 
-  // Simulate loading (you can remove setTimeout if data loads dynamically)
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
+    const timer = setTimeout(() => setLoading(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <LoadingDiamond />;
 
   return (
     <motion.div

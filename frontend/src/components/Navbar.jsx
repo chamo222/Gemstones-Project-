@@ -9,52 +9,94 @@ import { GiFoodTruck } from "react-icons/gi";
 const Navbar = ({ containerStyles, toggleMenu, menuOpened }) => {
   const navItems = [
     { to: '/', label: 'Home', icon: <TbHomeFilled /> },
-    { to: '/menu', label: 'Menu', icon: <IoMdListBox /> },
+    { to: '/Product', label: 'Product', icon: <IoMdListBox /> },
     { to: '/contact', label: 'Contact', icon: <IoMailOpen /> },
     { to: '/about', label: 'About', icon: <FaInfoCircle /> },
-    { to: '/orders', label: 'OrderTracking', icon: <GiFoodTruck /> },
+    { to: '/orders', label: 'Orders', icon: <GiFoodTruck /> },
   ];
 
-  // handle closing the menu automatically when a link is clicked
   const handleNavClick = () => {
     if (menuOpened) toggleMenu();
   };
 
   return (
-    <nav className={containerStyles}>
-      {/* Close button & logo for mobile menu */}
-      {menuOpened && (
-        <>
-          <FaRegWindowClose
-            onClick={toggleMenu}
-            className="text-xl self-end cursor-pointer relative left-8 md:hidden"
-          />
-          <Link to="/" className="bold-24 mb-6 md:hidden" onClick={handleNavClick}>
-            <h4 className="text-secondary">The Dias Restaurant</h4>
-          </Link>
-        </>
-      )}
+    <>
+      {/* Desktop + Mobile container */}
+      <nav className={`relative ${containerStyles}`}>
+        {/* Desktop: horizontal */}
+        <ul className="hidden md:flex items-center gap-6">
+          {navItems.map(({ to, label }) => (
+            <li key={label}>
+              <NavLink
+                to={to}
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-md transition-all duration-300 ${
+                    isActive
+                      ? "bg-[#4169E1] text-white shadow-md"
+                      : "text-gray-700 hover:bg-[#4169E1]/20 hover:text-[#4169E1]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
 
-      {/* Nav Items */}
-      {navItems.map(({ to, label, icon }) => (
-        <div key={label} className="inline-flex mb-2">
-          <NavLink
-            to={to}
-            onClick={handleNavClick}
-            className={({ isActive }) =>
-              isActive
-                ? "active-link flex items-center gap-x-2 md:gap-x-0"
-                : "flex items-center gap-x-2 md:gap-x-0"
-            }
-          >
-            {/* Mobile: show icon */}
-            <span className="text-xl md:hidden">{icon}</span>
-            {/* Desktop: hide icon, show only text */}
-            <h5 className="medium-16">{label}</h5>
-          </NavLink>
+        {/* Mobile menu button */}
+        <div className="md:hidden flex items-center justify-between px-4 py-2">
+          <Link to="/" className="text-xl font-bold text-[#4169E1]">
+            B Sirisena Holdings
+          </Link>
+          <button onClick={toggleMenu} className="text-2xl">
+            {menuOpened ? <FaRegWindowClose /> : "☰"}
+          </button>
         </div>
-      ))}
-    </nav>
+
+        {/* Mobile slide-in menu */}
+        <div
+          className={`fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-50 transform transition-transform duration-300 md:hidden ${
+            menuOpened ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between px-4 py-4 border-b">
+            <h2 className="text-lg font-bold text-[#4169E1]">B Sirisena Holdings Pvt Ltd</h2>
+            <FaRegWindowClose
+              onClick={toggleMenu}
+              className="text-xl cursor-pointer"
+            />
+          </div>
+          <ul className="flex flex-col gap-4 mt-4 px-4">
+            {navItems.map(({ to, label, icon }) => (
+              <li key={label}>
+                <NavLink
+                  to={to}
+                  onClick={handleNavClick}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-300 ${
+                      isActive
+                        ? "bg-[#4169E1] text-white shadow-md"
+                        : "text-gray-700 hover:bg-[#4169E1]/20 hover:text-[#4169E1]"
+                    }`
+                  }
+                >
+                  <span className="text-xl">{icon}</span>
+                  <span>{label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Mobile overlay */}
+        {menuOpened && (
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+            onClick={toggleMenu}
+          ></div>
+        )}
+      </nav>
+    </>
   );
 };
 

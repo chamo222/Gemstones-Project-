@@ -70,16 +70,16 @@ const decrement = (id, size)=>{
                   <div className='flex flex-col w-full'>
                     <div className='flexBetween'>
                       <h5 className='h5 !my-0 line-clamp-1'>{productData.name}</h5>
-                      <FaRegWindowClose onClick={()=>updateQuantity(item._id,item.size, 0)} className='cursor-pointer text-secondary'/>
+                      <FaRegWindowClose onClick={()=>updateQuantity(item._id,item.size, 0)} className='cursor-pointer text-[#4169E1] '/>
                     </div>
                     <p className='bold-14 my-0.5'>{item.size}</p>
                     <div className='flexBetween'>
                       <div className='flex items-center ring-1 ring-slate-900/5 rounded-full overflow-hidden bg-primary'>
-                        <button onClick={()=> decrement(item._id, item.size)} className='p-1.5 bg-white text-secondary rounded-full shadow-md'>
+                        <button onClick={()=> decrement(item._id, item.size)} className='p-1.5 bg-white text-[#4169E1]  rounded-full shadow-md'>
                           <FaMinus className='text-xs'/>
                         </button>
                         <p className='px-2'>{quantities[key]}</p>
-                        <button onClick={()=> increment(item._id, item.size)} className='p-1.5 bg-white text-secondary rounded-full shadow-md'>
+                        <button onClick={()=> increment(item._id, item.size)} className='p-1.5 bg-white text-[#4169E1]  rounded-full shadow-md'>
                           <FaPlus className='text-xs'/>
                         </button>
                       </div>

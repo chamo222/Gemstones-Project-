@@ -13,7 +13,7 @@ import Revenue from './pages/Revenue'
 import FinancePage from './pages/FinancePage'
 
 export const backend_url = import.meta.env.VITE_BACKEND_URL
-export const currency = "Rs"
+export const currency = "$"
 
 function App() {
 

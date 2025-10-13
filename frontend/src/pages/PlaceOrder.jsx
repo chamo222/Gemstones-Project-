@@ -120,7 +120,7 @@ const PlaceOrder = () => {
             <CartTotal />
             {/* payment method */}
             <div className='my-6'>
-              <h3 className='bold-20 mb-5'>Payment <span className='text-secondary'>Method</span></h3>
+              <h3 className='bold-20 mb-5'>Payment <span className='text-[#4169E1]'>Method</span></h3>
               <div className='flex gap-3'>
                 <div onClick={() => setMethod('stripe')} className={`${method === 'stripe' ? "btn-secondary" : "btn-light"} !py-1 text-xs cursor-pointer`}>Stripe</div>
                 <div onClick={() => setMethod('cod')} className={`${method === 'cod' ? "btn-secondary" : "btn-light"} !p-1 !px-3 text-xs cursor-pointer`}>Cash on Delivery</div>

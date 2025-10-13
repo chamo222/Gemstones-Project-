@@ -17,7 +17,7 @@ const PopularFoods = () => {
     <section className="max-padd-container py-20">
       <Title
         title1={'Popular'}
-        title2={'Foods'}
+        title2={'Gemstones'}
         titleStyles={'text-center !pb-20'}
         paraStyles={'!block'}
       />

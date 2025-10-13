@@ -1,9 +1,10 @@
-import curry from "../assets/categories/curry.svg";
-import pizza from "../assets/categories/pizza.svg";
-import rice from "../assets/categories/rice.svg";
-import deserts from "../assets/categories/deserts.svg";
-import fruits from "../assets/categories/fruits.svg";
-import drinks from "../assets/categories/drinks.svg";
+// Categories Data
+import cobaltspinel from "../assets/categories/cobalt-spinel.png";
+import chrysoberyl from "../assets/categories/chrysoberyl.png";
+import aquamarine from "../assets/categories/aquamarine.png";
+import andalusite from "../assets/categories/andalusite.png";
+import amethyst from "../assets/categories/amethyst.png";
+import garnet from "../assets/categories/garnet.png";
 
 import food_1 from './food_1.png'
 import food_2 from './food_2.png'
@@ -56,28 +57,28 @@ import food_48 from './food_48.png'
 
 export const categories = [
   {
-    name: "Curry",
-    image: curry,
+    name: "Garnet",
+    image: garnet,
   },
   {
-    name: "Pizza",
-    image: pizza,
+    name: "Sobalt Spinel",
+    image: cobaltspinel,
   },
   {
-    name: "Rice",
-    image: rice,
+    name: "Chrysoberyl",
+    image: chrysoberyl,
   },
   {
-    name: "Deserts",
-    image: deserts,
+    name: "Aquamarine",
+    image: aquamarine,
   },
   {
-    name: "Drinks",
-    image: drinks,
+    name: "Andalusite",
+    image: andalusite,
   },
   {
-    name: "Fruits",
-    image: fruits,
+    name: "Amethyst",
+    image: amethyst,
   },
 ];
 
