@@ -1,11 +1,12 @@
+// src/pages/Orders.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { backend_url, currency } from "../App";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { TfiPackage } from "react-icons/tfi";
 import { FiSearch } from "react-icons/fi";
-import Footer from "../components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
+import Footer from "../components/Footer";
 
 const notificationSound = "../assets/order_notification.mp3";
 
@@ -13,9 +14,11 @@ const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [openOrderDetails, setOpenOrderDetails] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAll, setShowAll] = useState(false); // State to toggle showing all orders
   const lastOrderCount = useRef(0);
   const audioRef = useRef(null);
 
+  // Initialize notification sound
   useEffect(() => {
     audioRef.current = new Audio(notificationSound);
     audioRef.current.volume = 0.5;
@@ -118,13 +121,16 @@ const Orders = ({ token }) => {
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Determine orders to display based on showAll toggle
+  const displayedOrders = showAll ? filteredOrders : filteredOrders.slice(0, 7);
+
   return (
-    <div className="px-6 sm:px-12 py-8">
+    <div className="px-6 sm:px-12 py-8 bg-white min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         🛒 Orders Dashboard
       </h1>
 
-      {/* Search bar */}
+      {/* Search Bar */}
       <div className="mb-6 relative w-full sm:w-1/2">
         <input
           type="text"
@@ -136,10 +142,9 @@ const Orders = ({ token }) => {
         <FiSearch className="absolute right-4 top-3 text-gray-400 text-xl" />
       </div>
 
-      <div className="grid gap-8">
+      <div className="grid gap-6">
         <AnimatePresence>
-          {filteredOrders.map((order) => {
-            // Determine payment status
+          {displayedOrders.map((order) => {
             let paymentStatus = "⌛ Pending";
             if (order.status === "Delivered" && order.payment) {
               paymentStatus = "✅ Successfully Paid";
@@ -154,150 +159,177 @@ const Orders = ({ token }) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.3 }}
-                className={`bg-white rounded-2xl p-10 shadow-lg border hover:shadow-xl transition-shadow ${
+                className={`bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition p-6 ${
                   order.status === "Cancelled" ? "opacity-60" : ""
                 }`}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="hidden xl:flex items-center justify-center w-20 h-20 rounded-full bg-primary shadow">
-                      <TfiPackage className="text-5xl text-secondary" />
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 text-orange-500 text-2xl shadow-md">
+                      <TfiPackage />
                     </div>
                     <div>
                       <h2 className="text-lg font-semibold text-gray-700">
                         {order.items.length} Items
                       </h2>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-gray-500 text-sm">
                         Order ID: {order._id.slice(-6).toUpperCase()}
                       </p>
+                      <span
+                        className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          order.status === "Delivered"
+                            ? "bg-green-100 text-green-700"
+                            : order.status === "Cancelled"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {order.status}
+                      </span>
                     </div>
                   </div>
 
-                  <div>
-                    <span className="font-semibold text-gray-700 mr-3">
-                      Price:
-                    </span>
-                    <span className="text-black font-bold text-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="text-lg font-bold">
                       {currency}
                       {order.amount.toLocaleString()}
-                    </span>
+                    </div>
+
+                    <select
+                      onChange={(e) => statusHandler(e, order._id)}
+                      value={order.status}
+                      className="p-2 rounded-lg border border-gray-300 shadow-sm text-sm font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    >
+                      <option value="Order Placed">Order Placed</option>
+                      <option value="Packing">Seller to Pack</option>
+                      <option value="Shipped">Ready</option>
+                      <option value="Out for Delivery">Out for Delivery</option>
+                      <option value="Delivered">Delivered</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+
+                    <button
+                      onClick={() => toggleOrderDetails(order._id)}
+                      className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      {openOrderDetails[order._id] ? "Hide Details" : "Show Details"}
+                    </button>
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-between items-center">
-                  <button
-                    onClick={() => toggleOrderDetails(order._id)}
-                    className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-300"
-                  >
-                    {openOrderDetails[order._id] ? "Hide Details" : "Show Details"}
-                  </button>
-
-                  <select
-                    onChange={(e) => statusHandler(e, order._id)}
-                    value={order.status}
-                    className="p-2 rounded-lg border border-gray-300 shadow-sm text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
-                  >
-                    <option value="Order Placed">Order Placed</option>
-                    <option value="Packing">Seller to Pack</option>
-                    <option value="Shipped">Ready</option>
-                    <option value="Out for Delivery">Out for Delivery</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </div>
-
-                {openOrderDetails[order._id] && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-6 space-y-5"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <table className="w-full text-sm">
-                        <tbody>
-                          <tr>
-                            <td className="p-2 font-semibold">Total:</td>
-                            <td className="p-2">
-                              {currency}
-                              {order.amount}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="p-2 font-semibold">Payment Method:</td>
-                            <td className="p-2">{order.paymentMethod}</td>
-                          </tr>
-                          <tr>
-                            <td className="p-2 font-semibold">Payment Status:</td>
-                            <td className="p-2">{paymentStatus}</td>
-                          </tr>
-                          <tr>
-                            <td className="p-2 font-semibold">Date:</td>
-                            <td className="p-2">
-                              {new Date(order.date).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-
-                      <div className="bg-gray-100 p-4 rounded-lg">
-                        <p>
-                          <span className="font-semibold text-gray-700">Name: </span>
-                          {order.address.firstName} {order.address.lastName}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-gray-700">Address: </span>
-                          {order.address.street}, {order.address.city}, {order.address.state}, {order.address.country}, {order.address.zipcode}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-gray-700">Phone: </span>
-                          {order.address.phone}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
-                      <h3 className="font-semibold text-gray-700 mb-3">Items:</h3>
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="p-2 text-left">Image</th>
-                            <th className="p-2 text-left">Name</th>
-                            <th className="p-2 text-left">Size</th>
-                            <th className="p-2 text-left">Quantity</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {order.items.map((item, index) => (
-                            <tr key={index} className="border-t">
-                              <td className="p-2">
-                                <img
-                                  src={
-                                    item.imageUrl
-                                      ? item.imageUrl.startsWith("http")
-                                        ? item.imageUrl
-                                        : `${backend_url.replace(/\/$/, "")}/${item.imageUrl.replace(/^\//, "")}`
-                                      : "/placeholder.png"
-                                  }
-                                  alt={item.name}
-                                  className="w-16 h-16 object-cover rounded-md"
-                                />
+                {/* Order Details */}
+                <AnimatePresence>
+                  {openOrderDetails[order._id] && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-6 rounded-lg p-4 space-y-4 shadow-inner"
+                    >
+                      {/* ... Your existing order details rendering ... */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <table className="w-full text-sm">
+                          <tbody>
+                            <tr>
+                              <td className="font-semibold p-1">Total:</td>
+                              <td className="p-1">
+                                {currency}
+                                {order.amount.toLocaleString()}
                               </td>
-                              <td className="p-2">{item.name}</td>
-                              <td className="p-2">{item.size}</td>
-                              <td className="p-2">{item.quantity}</td>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </motion.div>
-                )}
+                            <tr>
+                              <td className="font-semibold p-1">Payment Method:</td>
+                              <td className="p-1">{order.paymentMethod}</td>
+                            </tr>
+                            <tr>
+                              <td className="font-semibold p-1">Payment Status:</td>
+                              <td className="p-1">{paymentStatus}</td>
+                            </tr>
+                            <tr>
+                              <td className="font-semibold p-1">Date:</td>
+                              <td className="p-1">
+                                {new Date(order.date).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                          <p>
+                            <span className="font-semibold">Name: </span>
+                            {order.address.firstName} {order.address.lastName}
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Address: </span>
+                            {order.address.street}, {order.address.city},{" "}
+                            {order.address.state}, {order.address.country},{" "}
+                            {order.address.zipcode}
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Phone: </span>
+                            {order.address.phone}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto bg-white p-4 rounded-lg shadow-sm">
+                        <h3 className="font-semibold text-gray-700 mb-3">Items:</h3>
+                        <table className="w-full text-sm border-collapse">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="p-2 text-left">Image</th>
+                              <th className="p-2 text-left">Name</th>
+                              <th className="p-2 text-left">Size</th>
+                              <th className="p-2 text-left">Quantity</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {order.items.map((item, idx) => (
+                              <tr key={idx} className="border-t">
+                                <td className="p-2">
+                                  <img
+                                    src={
+                                      item.imageUrl
+                                        ? item.imageUrl.startsWith("http")
+                                          ? item.imageUrl
+                                          : `${backend_url.replace(/\/$/, "")}/${item.imageUrl.replace(/^\//, "")}`
+                                        : "/placeholder.png"
+                                    }
+                                    alt={item.name}
+                                    className="w-16 h-16 object-cover rounded-md"
+                                  />
+                                </td>
+                                <td className="p-2">{item.name}</td>
+                                <td className="p-2">{item.size}</td>
+                                <td className="p-2">{item.quantity}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             );
           })}
         </AnimatePresence>
+      </div>
+
+      {/* Load More / Show Less Button */}
+      {filteredOrders.length > 7 && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            {showAll ? "Show Less" : "Load More Orders"}
+          </button>
+        </div>
+      )}
+
+      <div className="mt-12">
         <Footer />
       </div>
     </div>

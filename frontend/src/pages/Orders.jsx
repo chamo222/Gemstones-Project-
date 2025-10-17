@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaCheckCircle, FaTimesCircle, FaFileDownload, FaTimes } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaFileDownload, FaTimes, FaWhatsapp } from "react-icons/fa";
 import Title from "../components/Title";
 import Footer from "../components/Footer";
 import { io as socketClient } from "socket.io-client";
@@ -59,7 +59,7 @@ const Orders = () => {
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setTimeout(() => setLoading(false), 1000); // 10 seconds = 10000 ms
+      setTimeout(() => setLoading(false), 1000);
     }
   };
 
@@ -217,6 +217,16 @@ const Orders = () => {
   };
 
   const trackedOrder = orders.find((o) => o._id === trackingOrderId);
+
+  // WhatsApp link
+  const whatsappNumber = "261336261649"; // Replace with your number
+  const lastOrder = orders[0];
+  const whatsappMessage = encodeURIComponent(
+    lastOrder
+      ? `Hello, I want to inquire about my recent order: ${lastOrder._id.slice(-6).toUpperCase()}`
+      : "Hello, I want to inquire about my orders."
+  );
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <motion.section
@@ -384,6 +394,20 @@ const Orders = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* WhatsApp Floating Button */}
+        <motion.a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
+          whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+          animate={{ y: [0, -5, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          <FaWhatsapp className="text-2xl" />
+          <span className="hidden sm:inline">Contact Seller</span>
+        </motion.a>
 
         <div className="mt-16">
           <Footer />

@@ -3,12 +3,16 @@ import loginImg from "../assets/Login.png"
 import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-
-
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const Login = () => {
+  const { token, setToken, backendUrl } = useContext(ShopContext)
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  const { token, setToken, navigate, backendUrl } = useContext(ShopContext)
+  // Read redirect path from query parameter, default to home
+  const params = new URLSearchParams(location.search)
+  const redirectPath = params.get('redirect') || '/'
 
   const [currState, setCurrState] = useState('Login')
   const [name, setName] = useState('')
@@ -23,18 +27,17 @@ const Login = () => {
         if (response.data.success) {
           setToken(response.data.token)
           localStorage.setItem('token', response.data.token)
-        }
-        else {
+          navigate(redirectPath) // redirect after signup
+        } else {
           toast.error(response.data.message)
         }
-      }
-      else {
+      } else {
         const response = await axios.post(backendUrl + '/api/user/login', { email, password })
         if (response.data.success) {
           setToken(response.data.token)
           localStorage.setItem('token', response.data.token)
-        }
-        else {
+          navigate(redirectPath) // redirect after login
+        } else {
           toast.error(response.data.message)
         }
       }
@@ -44,16 +47,14 @@ const Login = () => {
     }
   }
 
-
-  useEffect(()=>{
-    if(token){
-      navigate('/')
+  useEffect(() => {
+    if (token) {
+      navigate(redirectPath)
     }
-  },[token])
+  }, [token, redirectPath, navigate])
 
   return (
     <section className='absolute top-0 left-0 h-full w-full z-50 bg-white'>
-      {/* Container */}
       <div className='flex h-full w-full'>
         {/* Image Side */}
         <div className='w-1/2 hidden sm:block'>

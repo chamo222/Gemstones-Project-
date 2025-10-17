@@ -4,7 +4,11 @@ import chrysoberyl from "../assets/categories/chrysoberyl.png";
 import aquamarine from "../assets/categories/aquamarine.png";
 import andalusite from "../assets/categories/andalusite.png";
 import amethyst from "../assets/categories/amethyst.png";
-import garnet from "../assets/categories/garnet.png";
+import garnet from "../assets/categories/garnet1.png";
+import Ruby from "../assets/categories/ruby.png";
+import Emerald from "../assets/categories/emerald.png";
+import Tourmaline from "../assets/categories/tourmaline.png";
+import Sapphire from "../assets/categories/sapphire.png";
 
 import food_1 from './food_1.png'
 import food_2 from './food_2.png'
@@ -79,6 +83,22 @@ export const categories = [
   {
     name: "Amethyst",
     image: amethyst,
+  },
+  {
+    name: "Ruby",
+    image: Ruby,
+  },
+  {
+    name: "Tourmaline",
+    image: Tourmaline,
+  },
+  {
+    name: "Sapphire",
+    image: Sapphire,
+  },
+  {
+    name: "Emerald",
+    image: Emerald,
   },
 ];
 

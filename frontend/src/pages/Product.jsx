@@ -7,7 +7,8 @@ import Item from '../components/Item';
 import Footer from '../components/Footer';
 import { ShopContext } from '../context/ShopContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GiCutDiamond } from 'react-icons/gi'; // Diamond loader
+import { GiCutDiamond } from 'react-icons/gi';
+import { FaWhatsapp } from 'react-icons/fa';
 
 // 💎 Orders-style LoadingDiamond
 const LoadingDiamond = () => (
@@ -97,6 +98,11 @@ const Product = () => {
     }, 1000); // 1-second loading delay
     return () => clearTimeout(timer);
   }, [category, sortType, foods, search]);
+
+  // WhatsApp info
+  const whatsappNumber = "261336261649"; // replace with your number
+  const whatsappMessage = encodeURIComponent("Hello, I am interested in your gemstones.");
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <section className="max-padd-container mt-24">
@@ -228,6 +234,20 @@ const Product = () => {
           </motion.div>
         )}
       </div>
+
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
+        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <FaWhatsapp className="text-2xl" />
+        <span className="hidden sm:inline">Contact Seller</span>
+      </motion.a>
 
       <Footer />
     </section>

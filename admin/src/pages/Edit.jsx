@@ -8,6 +8,7 @@ import upload_icon from "../assets/upload_icon.png";
 import { TbTrash } from "react-icons/tb";
 import { FaPlus } from "react-icons/fa6";
 import Footer from "../components/Footer";
+import { motion } from "framer-motion";
 
 const Edit = () => {
   const { id } = useParams(); // productId from route
@@ -35,7 +36,6 @@ const Edit = () => {
         setPopular(product.popular);
         setExistingImage(product.image);
 
-        // Convert price object back to array for form
         const priceArr = Object.entries(product.price).map(([size, price]) => ({
           size,
           price,
@@ -55,9 +55,7 @@ const Edit = () => {
   }, [id]);
 
   const handleImageChange = (e) => setImage(e.target.files[0]);
-
   const addSizePrice = () => setPrices([...prices, { size: "", price: "" }]);
-
   const handleSizePriceChange = (index, field, value) => {
     const updatePrices = prices.map((item, i) =>
       i === index
@@ -66,7 +64,6 @@ const Edit = () => {
     );
     setPrices(updatePrices);
   };
-
   const removeSizePrice = (index) =>
     setPrices(prices.filter((_, i) => i !== index));
 
@@ -90,10 +87,7 @@ const Edit = () => {
 
       if (response.data.success) {
         toast.success("Product updated successfully!");
-        // Redirect after 2 seconds
-        setTimeout(() => {
-          navigate("/list");
-        }, 1000);
+        setTimeout(() => navigate("/list"), 1000);
       } else {
         toast.error(response.data.message);
       }
@@ -104,40 +98,58 @@ const Edit = () => {
   };
 
   return (
-    <div className="px-2 sm:px-8">
-      <form
+    <motion.div
+      className="px-4 sm:px-8 pt-16 pb-16 bg-gradient-to-b from-white to-blue-50 min-h-screen"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.form
         onSubmit={onSubmitHandler}
-        className="flex flex-col gap-y-3 medium-14 lg:w-[777px]"
+        className="flex flex-col gap-6 bg-white shadow-lg rounded-2xl p-8 lg:w-[750px] mx-auto border border-gray-100"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <div className="w-full">
-          <h5 className="h5">Product Name</h5>
+        <h2 className="text-2xl font-semibold text-[#4169E1] text-center">
+          Edit Gemstone
+        </h2>
+        <p className="text-gray-500 text-center text-sm">
+          Update gemstone details below.
+        </p>
+
+        {/* Product Name */}
+        <div>
+          <label className="font-medium text-gray-800">Product Name</label>
           <input
             onChange={(e) => setName(e.target.value)}
             value={name}
             type="text"
-            placeholder="Write here.."
-            className="px-3 py-1.5 ring-1 ring-slate-900/10 rounded bg-white mt-1 w-full max-w-lg"
+            placeholder="Enter gemstone name"
+            className="mt-1 px-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-[#4169E1] outline-none"
           />
         </div>
 
-        <div className="w-full">
-          <h5 className="h5">Product Description</h5>
+        {/* Product Description */}
+        <div>
+          <label className="font-medium text-gray-800">Description</label>
           <textarea
             onChange={(e) => setDescription(e.target.value)}
             value={description}
-            rows={5}
-            placeholder="Write here.."
-            className="px-3 py-1.5 ring-1 ring-slate-900/10 rounded bg-white mt-1 w-full max-w-lg"
+            rows={4}
+            placeholder="Describe gemstone quality, origin, and properties..."
+            className="mt-1 px-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-[#4169E1] outline-none"
           />
         </div>
 
-        <div className="flex items-end gap-x-6">
-          <div>
-            <h5 className="h5">Category</h5>
+        {/* Category + Image */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex-1 w-full">
+            <label className="font-medium text-gray-800">Category</label>
             <select
               onChange={(e) => setCategory(e.target.value)}
               value={category}
-              className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white mt-1 sm:w-full text-gray-30"
+              className="mt-1 px-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-[#4169E1] outline-none"
             >
               <option value="Garnet">Garnet</option>
               <option value="Sobalt Spinel">Sobalt Spinel</option>
@@ -145,15 +157,24 @@ const Edit = () => {
               <option value="Aquamarine">Aquamarine</option>
               <option value="Andalusite">Andalusite</option>
               <option value="Amethyst">Amethyst</option>
+              <option value="Ruby">Ruby</option>
+              <option value="Emerald">Emerald</option>
+              <option value="Tourmaline">Tourmaline</option>
+              <option value="Sapphire">Sapphire</option>
             </select>
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <label htmlFor="image">
+          {/* Image Upload */}
+          <div className="flex flex-col items-center">
+            <label className="font-medium text-gray-800 mb-1">Upload Image</label>
+            <label
+              htmlFor="image"
+              className="cursor-pointer w-28 h-28 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-[#4169E1] transition"
+            >
               <img
                 src={image ? URL.createObjectURL(image) : existingImage || upload_icon}
-                alt=""
-                className="w-14 h-14 aspect-square object-cover ring-1 ring-slate-900/5 bg-white rounded-lg"
+                alt="preview"
+                className="w-full h-full object-cover rounded-lg"
               />
               <input
                 type="file"
@@ -166,34 +187,30 @@ const Edit = () => {
           </div>
         </div>
 
-        {/* Sizes and Prices */}
+        {/* Sizes & Pricing */}
         <div>
-          <h5 className="h5">Size and Pricing</h5>
+          <label className="font-medium text-gray-800">Weights & Pricing</label>
           {prices.map((item, index) => (
-            <div key={index} className="flex items-end gap-4 mt-2">
+            <div key={index} className="flex items-center gap-3 mt-2">
               <input
-                onChange={(e) =>
-                  handleSizePriceChange(index, "size", e.target.value)
-                }
+                onChange={(e) => handleSizePriceChange(index, "size", e.target.value)}
                 value={item.size}
                 type="text"
-                placeholder="(S, M, L)"
-                className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white w-20"
+                placeholder="(1.2ct, 2.0ct, etc.)"
+                className="px-3 py-2 border border-gray-300 rounded-lg w-28 focus:ring-2 focus:ring-[#4169E1] outline-none"
               />
               <input
-                onChange={(e) =>
-                  handleSizePriceChange(index, "price", e.target.value)
-                }
+                onChange={(e) => handleSizePriceChange(index, "price", e.target.value)}
                 value={item.price}
                 type="number"
-                placeholder="Price"
+                placeholder="Price (USD)"
                 min={0}
-                className="px-3 py-2 ring-1 ring-slate-900/10 rounded bg-white w-20"
+                className="px-3 py-2 border border-gray-300 rounded-lg w-36 focus:ring-2 focus:ring-[#4169E1] outline-none"
               />
               <button
                 onClick={() => removeSizePrice(index)}
                 type="button"
-                className="text-red-500 !p-2 text-xl"
+                className="text-red-500 hover:text-red-600 text-xl p-1"
               >
                 <TbTrash />
               </button>
@@ -202,34 +219,39 @@ const Edit = () => {
           <button
             onClick={addSizePrice}
             type="button"
-            className="btn-secondary !rounded !text-xs flexCenter gap-x-2 mt-4 !px-3 !py-1"
+            className="flex items-center gap-2 mt-4 px-4 py-2 bg-[#4169E1]/10 text-[#4169E1] rounded-lg hover:bg-[#4169E1]/20 transition text-sm font-medium"
           >
-            <FaPlus /> Add Sizing
+            <FaPlus /> Add Weight
           </button>
         </div>
 
-        <div className="flexStart gap-2 my-2">
+        {/* Popular */}
+        <div className="flex items-center gap-2">
           <input
             onChange={() => setPopular((prev) => !prev)}
             type="checkbox"
             checked={popular}
             id="popular"
+            className="w-4 h-4 accent-[#4169E1]"
           />
-          <label htmlFor="popular" className="cursor-pointer">
-            Add to popular
+          <label htmlFor="popular" className="text-gray-700 cursor-pointer">
+            Mark as Featured
           </label>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="btn-dark !rounded mt-3 max-w-44 sm:w-full"
+          className="bg-[#4169E1] hover:bg-[#365ed1] text-white font-semibold py-2.5 rounded-lg shadow-md transition"
         >
           Update Product
         </button>
-      </form>
-      {/* Footer */}
-      <Footer />
-    </div>
+      </motion.form>
+
+      <div className="mt-12">
+        <Footer />
+      </div>
+    </motion.div>
   );
 };
 

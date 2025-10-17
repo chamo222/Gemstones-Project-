@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaEnvelope, FaHeadphones, FaLocationDot, FaPhone } from "react-icons/fa6";
 import { GiCutDiamond } from "react-icons/gi";
+import { FaWhatsapp } from "react-icons/fa";
 import Title from "../components/Title";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-// 💎 Modern diamond loading component (same as Orders page)
+// 💎 Modern diamond loading component
 const LoadingDiamond = () => (
   <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-[#faf7f2] to-white">
     <motion.div
@@ -28,6 +31,8 @@ const LoadingDiamond = () => (
 
 const Contact = () => {
   const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -35,6 +40,49 @@ const Contact = () => {
   }, []);
 
   if (loading) return <LoadingDiamond />;
+
+  const whatsappNumber = "261336261649"; 
+  const whatsappMessage = encodeURIComponent("Hello, I would like to inquire about your gemstones and services.");
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+
+  // Handle input change
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error("Please fill all fields!");
+      return;
+    }
+
+    try {
+      setSending(true);
+
+      // Use full backend URL here
+      const response = await axios.post(
+        "http://localhost:4000/api/contact", 
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.status === 200) {
+        toast.success("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error("Contact form error:", error.response || error.message);
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <section className="max-padd-container mt-24 bg-gradient-to-b from-[#faf7f2] to-white">
@@ -57,18 +105,22 @@ const Contact = () => {
             Have any questions about our gemstones or services? Send us a message and we’ll respond promptly.
           </p>
 
-          <form className="flex flex-col gap-5">
+          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="flex flex-col sm:flex-row gap-5">
               <input
                 type="text"
                 id="name"
                 placeholder="Your Name"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full py-3 px-4 rounded-lg border border-gray-200 focus:border-[#4169E1] focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all placeholder-gray-400"
               />
               <input
                 type="email"
                 id="email"
                 placeholder="Your Email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full py-3 px-4 rounded-lg border border-gray-200 focus:border-[#4169E1] focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all placeholder-gray-400"
               />
             </div>
@@ -77,16 +129,19 @@ const Contact = () => {
               id="message"
               rows="5"
               placeholder="Write your message here..."
+              value={formData.message}
+              onChange={handleChange}
               className="w-full py-3 px-4 rounded-lg border border-gray-200 focus:border-[#4169E1] focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all placeholder-gray-400 resize-none"
             ></textarea>
 
             <motion.button
               type="submit"
-              className="w-full py-3 rounded-lg bg-[#4169E1] text-white font-medium shadow-md hover:bg-blue-500 hover:shadow-lg transition-all"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              disabled={sending}
+              className="w-full py-3 rounded-lg bg-[#4169E1] text-white font-medium shadow-md hover:bg-blue-500 hover:shadow-lg transition-all disabled:opacity-50"
+              whileHover={{ scale: sending ? 1 : 1.03 }}
+              whileTap={{ scale: sending ? 1 : 0.97 }}
             >
-              Send Message
+              {sending ? "Sending..." : "Send Message"}
             </motion.button>
           </form>
         </motion.div>
@@ -157,6 +212,20 @@ const Contact = () => {
       <div className="mb-32"></div>
 
       <Footer />
+
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
+        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <FaWhatsapp className="text-2xl" />
+        <span className="hidden sm:inline">Contact Us</span>
+      </motion.a>
     </section>
   );
 };

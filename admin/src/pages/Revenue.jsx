@@ -28,10 +28,10 @@ const Revenue = () => {
   const [error, setError] = useState(null);
   const [salesType, setSalesType] = useState("daily");
   const [salesData, setSalesData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
-  // Load revenue stats
   const loadStats = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/revenue`);
@@ -43,7 +43,6 @@ const Revenue = () => {
     }
   };
 
-  // Load sales data based on type
   const loadSalesData = async (type) => {
     try {
       const res = await axios.get(`${backendUrl}/api/sales?type=${type}`);
@@ -56,29 +55,56 @@ const Revenue = () => {
   };
 
   useEffect(() => {
-    loadStats();
-    loadSalesData(salesType);
+    const fetchData = async () => {
+      setLoading(true);
+      await loadStats();
+      await loadSalesData(salesType);
+      setTimeout(() => setLoading(false), 1000); // Show loader for 1 second minimum
+    };
 
-    // Initialize Socket.IO connection
+    fetchData();
+
     const socket = io(backendUrl);
 
-    // Listen for new orders
     socket.on("newOrder", () => {
-      loadStats();          // Update stats
-      loadSalesData(salesType); // Update sales chart
+      loadStats();
+      loadSalesData(salesType);
     });
 
-    // Listen for order status updates
     socket.on("orderUpdated", () => {
-      loadStats();          // Update stats
-      loadSalesData(salesType); // Update sales chart
+      loadStats();
+      loadSalesData(salesType);
     });
 
     return () => socket.disconnect();
   }, [salesType]);
 
-  if (error) return <p className="text-center mt-20 text-red-500">{error}</p>;
-  if (!stats) return <p className="text-center mt-20">Loading...</p>;
+  if (error)
+    return <p className="text-center mt-20 text-red-500">{error}</p>;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen w-full bg-gradient-to-b from-[#faf7f2] to-white">
+        <div className="flex flex-col items-center">
+          <motion.div
+            animate={{ rotate: [0, 15, -15, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="text-7xl text-[#4169E1] mb-4"
+          >
+            <FaClipboardList />
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.5, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="text-lg font-semibold text-[#4169E1]"
+          >
+            Loading Revenue Data...
+          </motion.p>
+        </div>
+      </div>
+    );
+  }
 
   const statCards = [
     { title: "Total Orders", value: stats.totalOrders, icon: <FaClipboardList />, bg: "bg-blue-100", color: "text-blue-500" },
@@ -170,7 +196,6 @@ const Revenue = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

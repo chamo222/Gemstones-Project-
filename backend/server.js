@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
+import { createNotification } from "./utils/notifyEvent.js";
 
 // Routers
 import userRouter from "./routes/userRoute.js";
@@ -15,6 +16,8 @@ import orderRouter from "./routes/orderRoute.js";
 import revenueRouter from "./routes/revenueRoute.js";
 import salesRoutes from "./routes/salesRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -24,6 +27,7 @@ connectCloudinary();
 
 app.use(express.json());
 app.use(cors());
+app.use("/api/notifications", notificationRoutes);
 
 // API Routes
 app.use("/api/user", userRouter);
@@ -33,8 +37,21 @@ app.use("/api/order", orderRouter);
 app.use("/api/revenue", revenueRouter);
 app.use("/api/sales", salesRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api", contactRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.get("/", (req, res) => res.send("API connected!"));
+
+// Example triggers (you can place these in order/product controllers)
+app.post("/api/product/update", async (req, res) => {
+  await createNotification("new_product", "A new product was added!", io);
+  res.json({ success: true });
+});
+
+app.post("/api/test-order", async (req, res) => {
+  await createNotification("order_placed", "A new order has been placed!", io);
+  res.json({ success: true });
+});
 
 // Create HTTP server
 const server = http.createServer(app);

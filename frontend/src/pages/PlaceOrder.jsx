@@ -1,17 +1,16 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import CartTotal from '../components/CartTotal'
 import Footer from '../components/Footer'
 import Title from '../components/Title'
 import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const PlaceOrder = () => {
-
   const { navigate, backendUrl, cartItems, setCartItems, getCartAmount, delivery_charges, foods, token } = useContext(ShopContext)
 
-  const [method, setMethod] = useState('cod') // Default set to cash on delivery
-
+  const [method, setMethod] = useState('cod') // Default: cash on delivery
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,16 +22,22 @@ const PlaceOrder = () => {
     country: "",
     phone: "",
   })
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
   const onChangeHandler = (e) => {
-    const name = e.target.name;
+    const name = e.target.name
     const value = e.target.value
-
     setFormData(data => ({ ...data, [name]: value }))
   }
 
   const onSubmitHandler = async (event) => {
     event.preventDefault()
+
+    if (!token) {
+      setShowLoginPrompt(true)
+      return
+    }
+
     try {
       let orderItems = []
       for (const items in cartItems) {
@@ -48,52 +53,87 @@ const PlaceOrder = () => {
         }
       }
 
-      let orderData = {
+      const orderData = {
         address: formData,
         items: orderItems,
         amount: getCartAmount() + delivery_charges
       }
 
       switch (method) {
-        // api for COD method
         case 'cod':
           const response = await axios.post(backendUrl + '/api/order/place', orderData, { headers: { token } })
-          console.log(response.data)
           if (response.data.success) {
             setCartItems({})
             navigate('/orders')
-          }
-          else {
+          } else {
             toast.error(response.data.message)
           }
-          break;
-        // api for stripe method
+          break
         case 'stripe':
           const responseStripe = await axios.post(backendUrl + '/api/order/stripe', orderData, { headers: { token } })
           if (responseStripe.data.success) {
             const { session_url } = responseStripe.data
             window.location.replace(session_url)
-          }
-          else {
+          } else {
             toast.error(responseStripe.data.message)
           }
-
-          break;
+          break
         default:
-          break;
+          break
       }
     } catch (error) {
-      console.log(error)
       toast.error(error.message)
     }
   }
 
+  const handleLoginRedirect = () => navigate(`/login?redirect=/place-order`)
+  const handleCancelRedirect = () => navigate('/')
+
   return (
     <section className='max-padd-container mt-24'>
-      {/* Container */}
+      {/* Login Prompt Modal */}
+      <AnimatePresence>
+        {showLoginPrompt && (
+          <motion.div
+            className='fixed inset-0 bg-black/50 flex justify-center items-center z-50'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className='bg-white rounded-2xl p-8 w-[90%] sm:w-[450px] text-center shadow-2xl'
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <h3 className='text-2xl font-semibold mb-2 text-gray-800'>Please login first!</h3>
+              <p className='text-gray-600 mb-6'>
+                To complete your exquisite purchase, please login to your account.
+              </p>
+              <div className='flex justify-center gap-4'>
+                <button
+                  onClick={handleLoginRedirect}
+                  className='bg-royalblue text-white px-6 py-2 rounded-lg shadow-md transition hover:bg-blue-500 font-medium'
+                  style={{ backgroundColor: '#4169E1' }} // royal blue
+                >
+                  Login
+                </button>
+                <button
+                  onClick={handleCancelRedirect}
+                  className='border border-gray-400 px-6 py-2 rounded-lg hover:bg-gray-100 transition font-medium'
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Place Order Form */}
       <form onSubmit={onSubmitHandler} className='py-6'>
         <div className='flex flex-col xl:flex-row gap-20 xl:gap-28'>
-
           {/* Left side  delivery information */}
           <div className='flex flex-1 flex-col gap-3 text-[95%]'>
             <Title title1={'Delivery'} title2={'Information'} title1Styles={'h3'} />
@@ -107,22 +147,19 @@ const PlaceOrder = () => {
             <div className='flex gap-3'>
               <input required onChange={onChangeHandler} value={formData.city} type="text" name='city' placeholder='City' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
               <input required onChange={onChangeHandler} value={formData.zipcode} type="text" name='zipcode' placeholder='Zip Code' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
-              {/*<input required onChange={onChangeHandler} value={formData.state} type="text" name='state' placeholder='State' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
             </div>
             <div className='flex gap-3'>
-              {/*<input required onChange={onChangeHandler} value={formData.zipcode} type="text" name='zipcode' placeholder='Zip Code' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
-              {/* <input required onChange={onChangeHandler} value={formData.country} type="text" name='country' placeholder='Country' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' /> */}
+              <input required onChange={onChangeHandler} value={formData.state} type="text" name='state' placeholder='State' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
+              <input required onChange={onChangeHandler} value={formData.country} type="text" name='country' placeholder='Country' className='ring-1 ring-slate-900/15 p-1 pl-3 rounded-sm bg-primary outline-none' />
             </div>
           </div>
 
           {/* Right side  Cart total */}
           <div className='flex flex-1 flex-col'>
             <CartTotal />
-            {/* payment method */}
             <div className='my-6'>
               <h3 className='bold-20 mb-5'>Payment <span className='text-[#4169E1]'>Method</span></h3>
               <div className='flex gap-3'>
-                <div onClick={() => setMethod('stripe')} className={`${method === 'stripe' ? "btn-secondary" : "btn-light"} !py-1 text-xs cursor-pointer`}>Stripe</div>
                 <div onClick={() => setMethod('cod')} className={`${method === 'cod' ? "btn-secondary" : "btn-light"} !p-1 !px-3 text-xs cursor-pointer`}>Cash on Delivery</div>
               </div>
             </div>

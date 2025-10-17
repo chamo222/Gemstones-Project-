@@ -1,0 +1,178 @@
+import React, { useContext, useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ShopContext } from "../context/ShopContext";
+import { FaStar, FaStarHalfStroke } from "react-icons/fa6";
+import { TbShoppingBagPlus } from "react-icons/tb";
+import { motion } from "framer-motion";
+import Footer from "../components/Footer";
+
+const ProductDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { foods, currency, addToCart } = useContext(ShopContext);
+
+  const [loading, setLoading] = useState(true);
+
+  // Simulate loading for 2 seconds (adjust as needed)
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const product = foods.find((item) => item._id === id);
+
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Product not found.
+      </div>
+    );
+  }
+
+  // 🩵 Loading Animation (Diamond style)
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-white">
+        <motion.div
+          className="relative w-20 h-20"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        >
+          {/* Diamond shape with white lines */}
+          <motion.div
+            className="absolute inset-0 border-4 border-[#4169E1] rotate-45"
+            animate={{
+              rotate: [0, 180, 360],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2.5,
+              ease: "easeInOut",
+            }}
+          ></motion.div>
+          <motion.div
+            className="absolute inset-[6px] bg-[#4169E1]/10 rotate-45"
+            animate={{
+              scale: [1, 0.8, 1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2.5,
+              ease: "easeInOut",
+            }}
+          ></motion.div>
+        </motion.div>
+
+        <motion.p
+          className="mt-6 text-gray-600 text-sm font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          Preparing your gemstone details...
+        </motion.p>
+      </div>
+    );
+  }
+
+  // 🩵 Product Page
+  return (
+    <motion.section
+      className="max-w-7xl mx-auto px-5 py-16 mt-20"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-8 flex items-center gap-1 text-[#4169E1] hover:text-[#365ecf] font-medium transition"
+      >
+        ← Back
+      </button>
+
+      {/* Product Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        {/* Image */}
+        <motion.div
+          className="bg-white shadow-lg rounded-2xl overflow-hidden p-6 flex justify-center items-center hover:shadow-2xl transition-all duration-300"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.03 }}
+          transition={{ duration: 0.4 }}
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            className="rounded-lg w-full max-w-md object-contain"
+          />
+        </motion.div>
+
+        {/* Details */}
+        <div className="flex flex-col justify-between">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-semibold text-gray-800 mb-4">
+              {product.name}
+            </h1>
+
+            {/* Rating */}
+            <div className="flex items-center gap-x-1 text-yellow-500 mb-3">
+              <FaStar />
+              <FaStar />
+              <FaStar />
+              <FaStar />
+              <FaStarHalfStroke />
+              <span className="text-gray-500 text-sm ml-2">4.5 / 5 Rating</span>
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-600 leading-relaxed mb-6">
+              {product.description ||
+                "This gemstone is crafted with exceptional precision and brilliance, offering timeless elegance and premium quality."}
+            </p>
+
+            {/* Price */}
+            <div className="flex items-center gap-2 mb-6">
+              <p className="text-3xl font-bold text-[#4169E1]">
+                {currency}
+                {(Object.values(product.price)[0] ?? product.price).toLocaleString()}
+              </p>
+              <span className="text-gray-500 text-sm">/ each</span>
+            </div>
+
+            {/* Add to Cart */}
+            <button
+              onClick={() => addToCart(product._id)}
+              className="flex items-center justify-center gap-2 bg-[#4169E1] hover:bg-[#365ecf] text-white font-medium px-7 py-3 rounded-md shadow-md transition-all duration-300 w-full sm:w-auto"
+            >
+              <TbShoppingBagPlus size={18} />
+              Add to Cart
+            </button>
+          </div>
+
+          {/* Extra Info */}
+          <div className="mt-8 text-sm text-gray-500 border-t border-gray-200 pt-4">
+            <p>
+              ✅ 100% Authentic & Certified Gemstones  
+              <br />
+              🚚 Fast & Secure Shipping across Sri Lanka  
+              <br />
+              💎 Lifetime warranty on authenticity  
+              <br />
+              🔄 14-Day Return Policy
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-24">
+        <Footer />
+      </div>
+    </motion.section>
+  );
+};
+
+export default ProductDetails;

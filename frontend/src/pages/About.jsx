@@ -5,7 +5,8 @@ import gemDisplay3 from "../assets/gem-display3.jpg";
 import gemDisplay4 from "../assets/gem-display4.jpg";
 import { motion } from "framer-motion";
 import Footer from "../components/Footer";
-import { GiCutDiamond } from "react-icons/gi"; // Matching Orders page diamond
+import { GiCutDiamond } from "react-icons/gi";
+import { FaWhatsapp } from "react-icons/fa";
 
 // 💎 Orders-style LoadingDiamond component
 const LoadingDiamond = () => (
@@ -62,6 +63,13 @@ const About = () => {
   if (loading) {
     return <LoadingDiamond />;
   }
+
+  // WhatsApp float button
+  const whatsappNumber = "261336261649"; // Replace with your WhatsApp number
+  const whatsappMessage = encodeURIComponent(
+    "Hello, I would like to inquire about your gemstones and collections."
+  );
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <div className="max-w-[1440px] mx-auto px-6 sm:px-12 py-12 bg-gradient-to-b from-[#faf7f2] to-white">
@@ -175,6 +183,20 @@ const About = () => {
       </section>
 
       <Footer />
+
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
+        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <FaWhatsapp className="text-2xl" />
+        <span className="hidden sm:inline">Contact Us</span>
+      </motion.a>
     </div>
   );
 };

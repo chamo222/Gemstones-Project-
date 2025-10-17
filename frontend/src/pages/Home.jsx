@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Process from '../components/Process';
-import PopularFoods from '../components/PopularFoods';
+import PopularFoods from '../components/PopularGemstones';
 import coverBanner1 from "../assets/gem-display1.jpg";
 import coverBanner2 from "../assets/gem-display2.jpg";
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
 import { GiCutDiamond } from 'react-icons/gi'; // Diamond loader
+import { FaWhatsapp } from 'react-icons/fa';
 
 // 💎 Diamond-style loader
 const LoadingDiamond = () => (
@@ -39,6 +40,11 @@ const Home = () => {
   }, []);
 
   if (loading) return <LoadingDiamond />;
+
+  // WhatsApp button configuration
+  const whatsappNumber = "261336261649"; // Replace with your number
+  const whatsappMessage = encodeURIComponent("Hello, I would like to inquire about your gemstones.");
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <motion.div
@@ -76,7 +82,7 @@ const Home = () => {
         <Process />
       </motion.div>
 
-      {/* Popular Foods Section */}
+      {/* Popular Gemstones Section */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -100,7 +106,7 @@ const Home = () => {
         >
           <img
             src={coverBanner1}
-            alt="Restaurant interior"
+            alt="Gem Display 1"
             className="rounded-2xl md:rounded-e-2xl shadow-md hover:shadow-lg transition-all duration-300"
           />
         </motion.div>
@@ -110,7 +116,7 @@ const Home = () => {
         >
           <img
             src={coverBanner2}
-            alt="Restaurant dish"
+            alt="Gem Display 2"
             className="rounded-2xl md:rounded-s-2xl shadow-md hover:shadow-lg transition-all duration-300"
           />
         </motion.div>
@@ -125,6 +131,20 @@ const Home = () => {
       >
         <Footer />
       </motion.div>
+
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
+        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <FaWhatsapp className="text-2xl" />
+        <span className="hidden sm:inline">Contact Us</span>
+      </motion.a>
     </motion.div>
   );
 };
