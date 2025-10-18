@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
 import Navbar from './Navbar';
@@ -10,6 +10,8 @@ import { ShopContext } from '../context/ShopContext';
 const Header = () => {
   const { token, setToken, navigate, getCartCount } = useContext(ShopContext);
   const [menuOpened, setMenuOpened] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const toggleMenu = () => setMenuOpened(prev => !prev);
 
@@ -17,7 +19,19 @@ const Header = () => {
     navigate('/login');
     localStorage.removeItem('token');
     setToken('');
+    setDropdownOpen(false);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="w-full fixed top-0 left-0 z-50 bg-white shadow-sm">
@@ -58,8 +72,8 @@ const Header = () => {
           </Link>
 
           {/* User */}
-          <div className="group relative">
-            <div onClick={() => !token && navigate('/login')} className="cursor-pointer">
+          <div className="relative" ref={dropdownRef}>
+            <div onClick={() => token ? setDropdownOpen(prev => !prev) : navigate('/login')} className="cursor-pointer">
               {token ? (
                 <TbUserCircle className="text-[28px] hover:text-[#4169E1] transition-colors" />
               ) : (
@@ -71,10 +85,13 @@ const Header = () => {
 
             {/* User dropdown */}
             {token && (
-              <ul className="hidden group-hover:flex flex-col absolute right-0 top-10 bg-white shadow-md w-32 rounded ring-1 ring-slate-900/15 p-2">
+              <ul
+                className={`absolute right-0 top-12 bg-white shadow-md w-36 rounded ring-1 ring-slate-900/15 p-2 transition-all duration-300 origin-top
+                ${dropdownOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"}`}
+              >
                 <li
-                  onClick={() => navigate('/orders')}
-                  className="flexBetween cursor-pointer px-2 py-1 rounded hover:bg-[#4169E1]/10"
+                  onClick={() => { navigate('/orders'); setDropdownOpen(false); }}
+                  className="flexBetween cursor-pointer px-2 py-1 rounded hover:bg-[#4169E1]/10 transition"
                 >
                   <p>Orders</p>
                   <TbArrowNarrowRight className="opacity-50 text-[18px]" />
@@ -82,7 +99,7 @@ const Header = () => {
                 <hr className="my-1 border-gray-200" />
                 <li
                   onClick={logout}
-                  className="flexBetween cursor-pointer px-2 py-1 rounded hover:bg-[#4169E1]/10"
+                  className="flexBetween cursor-pointer px-2 py-1 rounded hover:bg-[#4169E1]/10 transition"
                 >
                   <p>Logout</p>
                   <TbArrowNarrowRight className="opacity-50 text-[18px]" />

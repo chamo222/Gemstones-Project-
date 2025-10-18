@@ -10,7 +10,7 @@ const Navbar = ({ containerStyles, toggleMenu, menuOpened }) => {
   const navItems = [
     { to: '/', label: 'Home', icon: <TbHomeFilled /> },
     { to: '/Product', label: 'Product', icon: <IoMdListBox /> },
-    { to: '/contact', label: 'Contact us', icon: <IoMailOpen /> },
+    { to: '/contact', label: 'Contact ', icon: <IoMailOpen /> },
     { to: '/about', label: 'About', icon: <FaInfoCircle /> },
     { to: '/orders', label: 'Orders', icon: <GiFoodTruck /> },
   ];

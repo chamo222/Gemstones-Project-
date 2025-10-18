@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backend_url } from "../App";
 import { motion, AnimatePresence } from "framer-motion";
+import Footer from "../components/Footer";
 
 function FinancePage() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -201,6 +202,7 @@ function FinancePage() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

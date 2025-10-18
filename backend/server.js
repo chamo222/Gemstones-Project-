@@ -18,6 +18,8 @@ import salesRoutes from "./routes/salesRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import otpRouter from "./routes/otpRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -39,6 +41,9 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api", contactRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/otp", otpRouter);
+app.use("/api/product", reviewRoutes);
+app.use("/api/review", reviewRoutes); 
 
 app.get("/", (req, res) => res.send("API connected!"));
 

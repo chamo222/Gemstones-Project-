@@ -127,7 +127,7 @@ const sendOrderStatusEmail = async (order, userEmail, userName) => {
           <p style="font-size:16px; text-align:center;">Hi <strong>${userName}</strong>, your order <strong>${formatOrderId(order._id)}</strong> has been cancelled.</p>
           <p style="font-size:15px; text-align:center; color:#555;">If this was a mistake or you’d like to reorder, feel free to contact our support team.</p>
           <div style="margin-top:30px; text-align:center;">
-            <a href="#" style="background:#dc3545; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Contact Support</a>
+            <a href="https://gemstonesproject.netlify.app/contact" style="background:#dc3545; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Contact Support</a>
           </div>
           <p style="margin-top:30px; text-align:center; font-size:13px; color:#888;">B Sirisena Holdings Pvt Ltd</p>
         </div>

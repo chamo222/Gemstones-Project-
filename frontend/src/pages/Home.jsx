@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Process from '../components/Process';
 import PopularFoods from '../components/PopularGemstones';
-import coverBanner1 from "../assets/gem-display1.jpg";
-import coverBanner2 from "../assets/gem-display2.jpg";
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
-import { GiCutDiamond } from 'react-icons/gi'; // Diamond loader
-import { FaWhatsapp } from 'react-icons/fa';
+import { GiCutDiamond } from 'react-icons/gi';
+import { FaWhatsapp, FaStar } from 'react-icons/fa';
+import axios from 'axios';
+import { ShopContext } from '../context/ShopContext';
 
-// 💎 Diamond-style loader
+// 💎 Loading diamond
 const LoadingDiamond = () => (
-  <div className="flex flex-col items-center justify-center h-screen text-center w-full">
+  <div className="flex flex-col items-center justify-center h-screen text-center">
     <motion.div
       initial={{ scale: 0.8, opacity: 0.7 }}
       animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
     >
       <GiCutDiamond className="text-[#4169E1] text-6xl drop-shadow-md" />
     </motion.div>
@@ -32,120 +32,121 @@ const LoadingDiamond = () => (
 );
 
 const Home = () => {
+  const { backendUrl } = useContext(ShopContext);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
+    setTimeout(() => setLoading(false), 2000);
   }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/review/all`);
+        if (res.data.success) setReviews(res.data.reviews);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchReviews();
+  }, [backendUrl]);
 
   if (loading) return <LoadingDiamond />;
 
-  // WhatsApp button configuration
-  const whatsappNumber = "261336261649"; // Replace with your number
-  const whatsappMessage = encodeURIComponent("Hello, I would like to inquire about your gemstones.");
+  // WhatsApp
+  const whatsappNumber = '261336261649';
+  const whatsappMessage = encodeURIComponent(
+    'Hello, I would like to inquire about your gemstones.'
+  );
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
+  // ✅ Smooth continuous scroll settings
+  const scrollSpeed = 30; // smaller = faster
+  const duplicatedReviews = [...reviews, ...reviews, ...reviews]; // triple for seamless loop
+
   return (
-    <motion.div
-      className="overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-    >
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-      >
-        <Hero />
-      </motion.div>
+    <div className="overflow-hidden">
+      <Hero />
+      <Features />
+      <Process />
 
-      {/* Features Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <Features />
-      </motion.div>
+      {/* 💬 Customer Reviews - Continuous Infinite Slider */}
+      {reviews.length > 0 && (
+        <div className="relative py-12 bg-white overflow-hidden">
+          <h2 className="text-2xl font-bold text-center text-[#4169E1] mb-8">
+            Customer Reviews
+          </h2>
 
-      {/* Process Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-      >
-        <Process />
-      </motion.div>
+          <div className="relative w-full overflow-hidden">
+            <motion.div
+              className="flex gap-6"
+              style={{
+                width: 'max-content',
+                whiteSpace: 'nowrap',
+              }}
+              animate={{
+                x: ['0%', '-33.33%'], // move by 1/3 of total width since tripled
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: scrollSpeed,
+                ease: 'linear',
+              }}
+            >
+              {duplicatedReviews.map((r, idx) => (
+                <div
+                  key={idx}
+                  className="flex-shrink-0 bg-white border border-gray-100 rounded-xl shadow-sm p-5 w-80 min-w-[320px] flex flex-col justify-between"
+                >
+                  <p className="text-gray-700 mb-3 break-words text-sm italic">
+                    “{r.comment}”
+                  </p>
+                  <div className="flex items-center mb-2">
+                    {[...Array(r.rating)].map((_, i) => (
+                      <FaStar key={i} className="text-yellow-400 mr-1" />
+                    ))}
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {r.name || 'Anonymous'}
+                  </p>
+                  {r.productName && (
+                    <p className="text-xs text-gray-500 truncate">
+                      {r.productName}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    {r.createdAt
+                      ? new Date(r.createdAt).toLocaleDateString()
+                      : ''}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      )}
 
-      {/* Popular Gemstones Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <PopularFoods />
-      </motion.div>
+      <PopularFoods />
+      <Footer />
 
-      {/* Cover Banners */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        className="max-w-[1440px] mx-auto flex flex-col md:flex-row gap-7 py-12 px-4"
-      >
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 200 }}
-        >
-          <img
-            src={coverBanner1}
-            alt="Gem Display 1"
-            className="rounded-2xl md:rounded-e-2xl shadow-md hover:shadow-lg transition-all duration-300"
-          />
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 200 }}
-        >
-          <img
-            src={coverBanner2}
-            alt="Gem Display 2"
-            className="rounded-2xl md:rounded-s-2xl shadow-md hover:shadow-lg transition-all duration-300"
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <Footer />
-      </motion.div>
-
-      {/* WhatsApp Floating Button */}
+      {/* 💬 WhatsApp Floating Button */}
       <motion.a
         href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-[#25D366] text-white font-medium px-4 py-3 rounded-full shadow-lg"
-        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(37, 211, 102, 0.6)" }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: '0 0 20px rgba(37, 211, 102, 0.6)',
+        }}
         animate={{ y: [0, -5, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
         <FaWhatsapp className="text-2xl" />
         <span className="hidden sm:inline">Contact Us</span>
       </motion.a>
-    </motion.div>
+    </div>
   );
 };
 

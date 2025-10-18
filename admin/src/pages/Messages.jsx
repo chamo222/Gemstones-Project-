@@ -15,12 +15,17 @@ const Messages = () => {
   const [showAllMobile, setShowAllMobile] = useState(false);
   const [showAllDesktop, setShowAllDesktop] = useState(false);
 
+  // Fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const res = await axios.get("http://localhost:4000/api/contact/all");
+        // Sort messages by newest first
+        const sortedMessages = res.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
         setTimeout(() => {
-          setMessages(res.data);
+          setMessages(sortedMessages);
           setLoading(false);
         }, 1000); // Loader visible for 1 second
       } catch (error) {
@@ -32,6 +37,7 @@ const Messages = () => {
     fetchMessages();
   }, []);
 
+  // Handle reply
   const handleReply = async (e) => {
     e.preventDefault();
     if (!reply.trim()) return toast.error("Please type a reply message.");
@@ -48,7 +54,7 @@ const Messages = () => {
         setMessages((prev) =>
           prev.map((m) =>
             m._id === selectedMessage._id
-              ? { ...m, reply: reply, repliedAt: new Date() }
+              ? { ...m, reply, repliedAt: new Date() }
               : m
           )
         );
@@ -65,6 +71,7 @@ const Messages = () => {
     }
   };
 
+  // Handle delete
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:4000/api/contact/${id}`);
@@ -106,7 +113,6 @@ const Messages = () => {
 
   return (
     <section className="p-6 md:p-10 bg-gradient-to-b from-[#faf7f2] to-white min-h-screen">
-      {/* Header with spacing from top */}
       <motion.div className="mt-10 md:mt-16">
         <motion.h2
           className="text-3xl font-bold text-[#4169E1] mb-10 flex items-center gap-3"

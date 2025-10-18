@@ -4,18 +4,36 @@ import logo from '../assets/logo.jpg';
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from 'react-icons/fa6';
 import { motion } from 'framer-motion';
 
+// Add URL for each link
 const FOOTER_LINKS = [
   {
     title: 'Shop',
-    links: ['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Collections'],
+    links: [
+      { name: 'Rings', url: '/shop/rings' },
+      { name: 'Necklaces', url: '/shop/necklaces' },
+      { name: 'Bracelets', url: '/shop/bracelets' },
+      { name: 'Earrings', url: '/shop/earrings' },
+      { name: 'Collections', url: '/shop/collections' },
+    ],
   },
   {
     title: 'Company',
-    links: ['About Us', 'Our Story', 'Careers', 'Privacy Policy', 'Terms'],
+    links: [
+      { name: 'About Us', url: '/about' },
+      { name: 'Our Story', url: '/story' },
+      { name: 'Careers', url: '/careers' },
+      { name: 'Privacy Policy', url: '/privacy' },
+      { name: 'Terms', url: '/terms' },
+    ],
   },
   {
     title: 'Support',
-    links: ['Contact Us', 'FAQ', 'Shipping & Returns', 'Warranty'],
+    links: [
+      { name: 'Contact Us', url: '/contact' },
+      { name: 'FAQ', url: '/faq' },
+      { name: 'Shipping & Returns', url: '/shipping-returns' },
+      { name: 'Warranty', url: '/warranty' },
+    ],
   },
 ];
 
@@ -29,11 +47,11 @@ const FOOTER_CONTACT_INFO = {
 };
 
 const SOCIALS = [
-  { icon: <FaFacebook />, link: 'https://www.instagram.com/logicforge.lk/' },
+  { icon: <FaFacebook />, link: 'https://www.facebook.com/yourpage' },
   { icon: <FaInstagram />, link: 'https://www.instagram.com/logicforge.lk/' },
-  { icon: <FaTwitter />, link: 'https://www.instagram.com/logicforge.lk/' },
-  { icon: <FaYoutube />, link: 'https://www.instagram.com/logicforge.lk/' },
-  { icon: <FaLinkedin />, link: 'https://www.instagram.com/logicforge.lk/' },
+  { icon: <FaTwitter />, link: 'https://twitter.com/yourpage' },
+  { icon: <FaYoutube />, link: 'https://youtube.com/yourchannel' },
+  { icon: <FaLinkedin />, link: 'https://linkedin.com/company/yourcompany' },
 ];
 
 const Footer = () => {
@@ -65,10 +83,10 @@ const Footer = () => {
                 {col.links.map((link, i) => (
                   <Link
                     key={i}
-                    to="#"
+                    to={link.url}
                     className="text-sm hover:text-[#4169E1] transition-colors"
                   >
-                    {link}
+                    {link.name}
                   </Link>
                 ))}
               </ul>
@@ -87,12 +105,14 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Social icons - Adjust for mobile */}
+      {/* Social icons */}
       <div className="flex justify-center md:absolute md:bottom-4 md:left-6 gap-4 md:gap-3 mt-4 md:mt-0">
         {SOCIALS.map((s, i) => (
           <a
             key={i}
             href={s.link}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[#4169E1] text-xl md:text-lg hover:text-[#5a7dfa] transition-transform duration-300 hover:scale-110"
           >
             {s.icon}

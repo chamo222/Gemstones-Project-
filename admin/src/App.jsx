@@ -17,6 +17,7 @@ import Contact from './pages/Contact'
 import About from './pages/About'
 import Support from './pages/Support'
 import Users from './pages/Users'
+import AdminReviews from './pages/AdminReviews.jsx';
 
 
 export const backend_url = import.meta.env.VITE_BACKEND_URL
@@ -53,6 +54,7 @@ function App() {
               <Route path="/contact" element={<Contact />} /> {/* ✅ Add this */}
               <Route path="/support" element={<Support />} /> {/* ✅ Add this */}
               <Route path="/users" element={<Users />} /> {/* ✅ Add this */}
+              <Route path="/admin/reviews" element={<AdminReviews />} />
             </Routes>
           </div>
         </div>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { backend_url, currency } from '../App'
 import { toast } from 'react-toastify'
 import { TbTrash, TbEdit } from 'react-icons/tb'
+import { FiSearch } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,7 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 const List = ({ token }) => {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
-  const [deleteProductId, setDeleteProductId] = useState(null) // for modal
+  const [deleteProductId, setDeleteProductId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showAll, setShowAll] = useState(false)
   const navigate = useNavigate()
 
   const fetchList = async () => {
@@ -18,11 +21,10 @@ const List = ({ token }) => {
     try {
       const response = await axios.get(backend_url + '/api/product/list')
       if (response.data.success) {
-        // Add a delay so loader doesn't disappear too fast
         setTimeout(() => {
           setList(response.data.products)
           setLoading(false)
-        }, 1000) 
+        }, 1000)
       } else {
         toast.error(response.data.message)
         setLoading(false)
@@ -88,11 +90,34 @@ const List = ({ token }) => {
     </motion.div>
   )
 
+  // Filtered products based on search term
+  const filteredList = list.filter(product =>
+    product._id.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Limit displayed products if showAll is false
+  const displayedList = showAll ? filteredList : filteredList.slice(0, 10)
+
   return (
     <div className="px-2 sm:px-8 mt-16 min-h-screen relative">
+      {/* Loading */}
       <AnimatePresence>
         {loading && <LoadingOverlay text="Loading Products..." />}
       </AnimatePresence>
+
+      {/* Search Bar */}
+      <div className="mb-4 flex justify-end">
+        <div className="relative w-full sm:w-1/3">
+          <input
+            type="text"
+            placeholder="Search by Product ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-10 p-3 border-2 border-[#4169E1] rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-sm sm:text-base"
+          />
+          <FiSearch className="absolute right-3 top-3 text-gray-400 text-lg" />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
@@ -132,6 +157,7 @@ const List = ({ token }) => {
         )}
       </AnimatePresence>
 
+      {/* Product List */}
       <div className="flex flex-col gap-3">
         {/* Desktop Header */}
         <div className="hidden md:grid grid-cols-[1fr_1fr_3fr_1fr_1fr_1fr_1fr] items-center py-2 px-2 bg-white bold-14 sm:bold-15 mb-3 rounded shadow">
@@ -144,36 +170,26 @@ const List = ({ token }) => {
           <h5>Remove</h5>
         </div>
 
-        {/* Product List */}
-        {list.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white rounded-xl shadow-sm overflow-hidden"
-          >
+        {displayedList.map((item) => (
+          <div key={item._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
             {/* Desktop row */}
             <div className="hidden md:grid grid-cols-[1fr_1fr_3fr_1fr_1fr_1fr_1fr] items-center gap-2 p-1">
               <div className="text-sm font-semibold">{item._id.slice(-6).toUpperCase()}</div>
-              <img src={item.image} alt="" className="w-12 rounded-lg" />
+              <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
               <h5 className="text-sm font-semibold">{item.name}</h5>
               <p className="font-semibold">{item.category}</p>
               <div className="text-sm font-semibold">
                 {currency}
                 {Object.values(item.price)[0]}
               </div>
-              <TbEdit
-                onClick={() => editProduct(item._id)}
-                className="text-center cursor-pointer text-lg text-blue-500"
-              />
-              <TbTrash
-                onClick={() => setDeleteProductId(item._id)}
-                className="text-center cursor-pointer text-lg text-red-500"
-              />
+              <TbEdit onClick={() => editProduct(item._id)} className="text-center cursor-pointer text-lg text-blue-500" />
+              <TbTrash onClick={() => setDeleteProductId(item._id)} className="text-center cursor-pointer text-lg text-red-500" />
             </div>
 
             {/* Mobile stacked version */}
             <div className="md:hidden flex flex-col gap-2 p-3 border-b last:border-b-0">
               <div className="flex items-center gap-3">
-                <img src={item.image} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
                 <div className="flex-1 flex flex-col gap-1">
                   <h5 className="font-semibold text-sm truncate">{item.name}</h5>
                   <p className="text-gray-600 text-sm">{item.category}</p>
@@ -183,20 +199,26 @@ const List = ({ token }) => {
               <div className="flex items-center justify-between mt-2">
                 <div className="font-semibold">{currency}{Object.values(item.price)[0]}</div>
                 <div className="flex gap-4">
-                  <TbEdit
-                    onClick={() => editProduct(item._id)}
-                    className="text-blue-500 cursor-pointer text-lg"
-                  />
-                  <TbTrash
-                    onClick={() => setDeleteProductId(item._id)}
-                    className="text-red-500 cursor-pointer text-lg"
-                  />
+                  <TbEdit onClick={() => editProduct(item._id)} className="text-blue-500 cursor-pointer text-lg" />
+                  <TbTrash onClick={() => setDeleteProductId(item._id)} className="text-red-500 cursor-pointer text-lg" />
                 </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Show More / Show Less */}
+      {filteredList.length > 10 && (
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="bg-[#4169E1] text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors"
+          >
+            {showAll ? 'Show Less' : 'Show More'}
+          </button>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="mt-10">

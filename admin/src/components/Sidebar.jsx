@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { FaPlus, FaListCheck } from "react-icons/fa6";
-import { FaInfoCircle, FaLifeRing } from "react-icons/fa";
+import { FaInfoCircle, FaLifeRing, FaComment, FaThumbsUp } from "react-icons/fa";
 import { MdFactCheck, MdMessage } from "react-icons/md";
 import { BiLogOut } from "react-icons/bi";
 import { motion } from "framer-motion";
@@ -16,7 +16,7 @@ const mainLinks = [
   { name: "Orders", icon: <MdFactCheck />, path: "/orders" },
   { name: "Messages", icon: <MdMessage />, path: "/messages" },
   { name: "Finance", icon: <MdFactCheck />, path: "/finance" },
-  { name: "Users", icon: <User />, path: "/users" }, // ✅ New Users link
+  { name: "Review", icon: <FaThumbsUp />, path: "/admin/reviews" }, // ✅ New Users link
 ];
 
 const extraLinks = [

@@ -17,6 +17,8 @@ import Cancel from "./pages/Cancel";
 import Payment from "./pages/Payment";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import OTPLogin from './components/OTPLogin';
+import SignupWithOTP from "./components/SignupWithOTP";
 
 export default function App() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+        <Route path="/otp-login" element={<OTPLogin />} />
+        <Route path="/Signup-OTP-login" element={<SignupWithOTP />} />
       </Routes>
     </main>
   )

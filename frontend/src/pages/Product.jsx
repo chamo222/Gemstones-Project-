@@ -222,13 +222,20 @@ const Product = () => {
                     visible: { opacity: 1, y: 0 },
                   }}
                   transition={{ duration: 0.4 }}
+                  className="relative flex flex-col items-center bg-white rounded-lg shadow hover:shadow-lg p-2"
                 >
+                  {/* Product Item */}
                   <Item food={food} />
+
+                  {/* Product ID inside card */}
+                  <div className="mt-2 bg-gray-100 px-2 py-1 rounded text-gray-700 text-xs font-medium tracking-wider text-center w-full">
+                    ID: {food._id.slice(-6).toUpperCase()}
+                  </div>
                 </motion.div>
               ))
             ) : (
               <p className="capitalize text-center w-full col-span-full">
-                No foods found for selected filters
+                No Products found for selected filters
               </p>
             )}
           </motion.div>

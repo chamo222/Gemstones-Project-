@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { TfiPackage } from "react-icons/tfi";
 import { FiSearch } from "react-icons/fi";
+import { FaShippingFast } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../components/Footer";
 
@@ -14,8 +15,11 @@ const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [openOrderDetails, setOpenOrderDetails] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAll, setShowAll] = useState(false); // State to toggle showing all orders
-  const lastOrderCount = useRef(0);
+  const [showAll, setShowAll] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const lastOrderIds = useRef(new Set());
+  const isInitialLoad = useRef(true); // Track first fetch
   const audioRef = useRef(null);
 
   // Initialize notification sound
@@ -58,24 +62,46 @@ const Orders = ({ token }) => {
       );
 
       if (response.data.success) {
-        const newOrders = response.data.orders;
+        let newOrders = response.data.orders;
+        newOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        if (newOrders.length > lastOrderCount.current) {
+        const newOrderIds = new Set(newOrders.map((o) => o._id));
+        const newlyReceivedOrders = newOrders.filter(
+          (o) => !lastOrderIds.current.has(o._id)
+        );
+
+        if (isInitialLoad.current) {
+          // First fetch: open first order by default
+          if (newOrders.length > 0) {
+            setOpenOrderDetails({ [newOrders[0]._id]: true });
+          }
+          isInitialLoad.current = false;
+        } else if (newlyReceivedOrders.length > 0) {
+          // New order received after initial load
           playNotificationSound();
           toast.info("🔔 New order received!", {
             position: "top-right",
             autoClose: 4000,
             theme: "colored",
           });
+
+          // Automatically open details for the first new order, close others
+          setOpenOrderDetails({ [newlyReceivedOrders[0]._id]: true });
         }
 
-        setOrders(newOrders);
-        lastOrderCount.current = newOrders.length;
+        setTimeout(() => {
+          setOrders(newOrders);
+          setLoading(false);
+        }, 1200);
+
+        lastOrderIds.current = newOrderIds;
       } else {
         toast.error(response.data.message);
+        setLoading(false);
       }
     } catch (error) {
       toast.error(error.message);
+      setLoading(false);
     }
   };
 
@@ -106,7 +132,7 @@ const Orders = ({ token }) => {
 
   const toggleOrderDetails = (orderId) => {
     setOpenOrderDetails((prev) => ({
-      ...prev,
+      // Close other orders when manually opening
       [orderId]: !prev[orderId],
     }));
   };
@@ -121,25 +147,60 @@ const Orders = ({ token }) => {
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Determine orders to display based on showAll toggle
   const displayedOrders = showAll ? filteredOrders : filteredOrders.slice(0, 7);
+
+  // -------------------- LOADER --------------------
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen bg-white">
+        <div className="flex flex-col items-center">
+          <div className="flex gap-3">
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{ y: [0, -15, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 0.8,
+                  delay: i * 0.2,
+                  repeatType: "loop",
+                }}
+                className="text-orange-500 text-5xl"
+              >
+                <FaShippingFast />
+              </motion.div>
+            ))}
+          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.5, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="text-lg font-semibold text-orange-500 mt-4"
+          >
+            Loading Orders...
+          </motion.p>
+        </div>
+      </div>
+    );
+  }
+  // -----------------------------------------------
 
   return (
     <div className="px-6 sm:px-12 py-8 bg-white min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        🛒 Orders Dashboard
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Orders Dashboard</h1>
 
       {/* Search Bar */}
-      <div className="mb-6 relative w-full sm:w-1/2">
-        <input
-          type="text"
-          placeholder="Search by Order ID..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pr-12 p-3 border-2 border-orange-400 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-lg"
-        />
-        <FiSearch className="absolute right-4 top-3 text-gray-400 text-xl" />
+      <div className="mb-4 flex justify-end">
+        <div className="relative w-full sm:w-1/3">
+          <input
+            type="text"
+            placeholder="Search by Product ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-10 p-3 border-2 border-[#4169E1] rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-sm sm:text-base"
+          />
+          <FiSearch className="absolute right-3 top-3 text-gray-400 text-lg" />
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -158,11 +219,12 @@ const Orders = ({ token }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4 }}
                 className={`bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition p-6 ${
                   order.status === "Cancelled" ? "opacity-60" : ""
                 }`}
               >
+                {/* Order Summary */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 text-orange-500 text-2xl shadow-md">
@@ -210,7 +272,7 @@ const Orders = ({ token }) => {
 
                     <button
                       onClick={() => toggleOrderDetails(order._id)}
-                      className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                      className="bg-[#4169E1] text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors"
                     >
                       {openOrderDetails[order._id] ? "Hide Details" : "Show Details"}
                     </button>
@@ -227,7 +289,6 @@ const Orders = ({ token }) => {
                       transition={{ duration: 0.3 }}
                       className="mt-6 rounded-lg p-4 space-y-4 shadow-inner"
                     >
-                      {/* ... Your existing order details rendering ... */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <table className="w-full text-sm">
                           <tbody>
@@ -290,10 +351,13 @@ const Orders = ({ token }) => {
                                 <td className="p-2">
                                   <img
                                     src={
-                                      item.imageUrl
-                                        ? item.imageUrl.startsWith("http")
-                                          ? item.imageUrl
-                                          : `${backend_url.replace(/\/$/, "")}/${item.imageUrl.replace(/^\//, "")}`
+                                      item.image
+                                        ? item.image.startsWith("http")
+                                          ? item.image
+                                          : `${backend_url.replace(/\/$/, "")}/${item.image.replace(
+                                              /^\/+/,
+                                              ""
+                                            )}`
                                         : "/placeholder.png"
                                     }
                                     alt={item.name}
@@ -322,7 +386,7 @@ const Orders = ({ token }) => {
         <div className="mt-6 flex justify-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+            className="bg-[#4169E1] text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors"
           >
             {showAll ? "Show Less" : "Load More Orders"}
           </button>

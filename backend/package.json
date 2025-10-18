@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
+    "@upstash/redis": "^1.35.6",
+    "axios": "^1.12.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cors": "^2.8.5",

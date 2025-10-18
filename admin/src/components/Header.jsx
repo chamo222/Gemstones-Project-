@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 import LogoLogicForge from "../assets/LogoLogicForge.jpg";
 import { BiLogOut } from "react-icons/bi";
-import { FaLifeRing, FaInfoCircle } from "react-icons/fa";
+import { FaLifeRing, FaInfoCircle, FaComment, FaThumbsUp } from "react-icons/fa";
 import axios from "axios";
 
 const Header = ({ setToken }) => {
@@ -96,6 +96,14 @@ const Header = ({ setToken }) => {
                 </div>
                 <ul className="flex flex-col">
                   <li>
+                    <Link
+                      to="/admin/reviews"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <FaThumbsUp />
+                      Reviews
+                    </Link>
                     <Link
                       to="/about"
                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition"
