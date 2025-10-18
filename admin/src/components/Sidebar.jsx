@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { FaPlus, FaListCheck } from "react-icons/fa6";
 import { FaInfoCircle, FaLifeRing, FaComment, FaThumbsUp } from "react-icons/fa";
 import { MdFactCheck, MdMessage } from "react-icons/md";
@@ -38,9 +38,11 @@ const Sidebar = ({ token, setToken }) => {
         <div className="flex flex-col items-center px-6 pt-20 pb-6">
           {/* 🟢 User Logo */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center shadow-md overflow-hidden border-2 border-orange-400">
-              <img src={logo} alt="User Logo" className="w-full h-full object-cover" />
-            </div>
+            <Link to="/"> {/* Redirects to home on click */}
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center shadow-md overflow-hidden border-2 border-orange-400 cursor-pointer">
+                <img src={logo} alt="User Logo" className="w-full h-full object-cover" />
+              </div>
+            </Link>
             <span className="mt-3 font-medium text-gray-700 text-sm">Store Admin</span>
           </div>
 
