@@ -9,7 +9,7 @@ export const ShopContext = createContext()
 const ShopContextProvider = (props) => {
 
   const currency = '$'
-  const delivery_charges = 350
+  const delivery_charges = 650
   const backendUrl = import.meta.env.VITE_BACKEND_URL
   const navigate = useNavigate()
 
