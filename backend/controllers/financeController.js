@@ -54,20 +54,25 @@ export const getFinanceTranscripts = async (req, res) => {
 
     let filters = { status: "Delivered" };
 
+    // Date range filtering
     if (startDate && endDate) {
       filters.date = {
-        $gte: new Date(startDate).getTime(),
-        $lte: new Date(endDate).getTime(),
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
       };
     }
 
+    // Customer name filter (if nested or populated)
     if (name) {
       filters["customer.name"] = { $regex: name, $options: "i" };
     }
 
-    let orders = await orderModel.find(filters).sort({ date: -1 });
+    let orders = await orderModel
+      .find(filters)
+      .populate("userId", "name email") // optional
+      .sort({ date: -1 });
 
-    // Filter by short order ID (last 6 characters)
+    // Filter by short order ID
     if (orderId) {
       orders = orders.filter(
         (o) => o._id.toString().slice(-6).toUpperCase() === orderId.toUpperCase()
@@ -81,12 +86,12 @@ export const getFinanceTranscripts = async (req, res) => {
       category: o.items?.[0]?.category || "N/A",
       amount: o.amount,
       paymentMethod: o.paymentMethod || "N/A",
-      customerName: o.customer?.name || "Unknown", // Updated for nested customer
+      customerName: o.customer?.name || o.userId?.name || "Unknown",
     }));
 
-    res.json({ transcripts });
+    res.json({ success: true, transcripts });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error fetching transcripts" });
+    res.status(500).json({ success: false, message: "Error fetching transcripts" });
   }
 };

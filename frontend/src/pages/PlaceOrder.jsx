@@ -161,6 +161,7 @@ const PlaceOrder = () => {
               <h3 className='bold-20 mb-5'>Payment <span className='text-[#4169E1]'>Method</span></h3>
               <div className='flex gap-3'>
                 <div onClick={() => setMethod('cod')} className={`${method === 'cod' ? "btn-secondary" : "btn-light"} !p-1 !px-3 text-xs cursor-pointer`}>Cash on Delivery</div>
+                <div onClick={() => setMethod('bank')} className={`${method === 'Bank' ? "btn-secondary" : "btn-light"} !p-1 !px-3 text-xs cursor-pointer`}>Bank</div>
               </div>
             </div>
             <div>

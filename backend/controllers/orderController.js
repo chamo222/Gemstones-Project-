@@ -42,7 +42,8 @@ const sendOrderConfirmationEmail = async (order, userEmail, userName) => {
       )
       .join("");
 
-    const htmlContent = `
+    // --------------------- User Email ---------------------
+    const userHtmlContent = `
       <div style="width:100%; background:#f4f4f8; padding:40px 0;">
         <div style="max-width:650px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
           <h2 style="text-align:center; color:#4a90e2;">💎 Order Confirmation</h2>
@@ -71,8 +72,44 @@ const sendOrderConfirmationEmail = async (order, userEmail, userName) => {
       from: `"B Sirisena Holdings" <${process.env.EMAIL_USER}>`,
       to: userEmail,
       subject: `💎 Your Order Confirmation - ${formatOrderId(order._id)}`,
-      html: htmlContent,
+      html: userHtmlContent,
     });
+
+    // --------------------- Admin Email with "View Order" Button ---------------------
+    const adminHtmlContent = `
+      <div style="width:100%; background:#f4f4f8; padding:40px 0;">
+        <div style="max-width:650px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+          <h2 style="text-align:center; color:#4a90e2;">📦 New Order Placed</h2>
+          <p style="font-size:16px;">A new order has been placed by <strong>${userName}</strong> (ID: ${order.userId})</p>
+
+          <div style="margin:20px 0; padding:15px; background:#f9f9fc; border-radius:8px; font-size:14px;">
+            <p><strong>Order ID:</strong> ${formatOrderId(order._id)}</p>
+            <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
+            <p><strong>Total:</strong> ${order.amount} ${currency}</p>
+          </div>
+
+          <h3 style="margin-bottom:10px;">Items:</h3>
+          <table width="100%" style="border-collapse:collapse;">
+            ${itemsHtml}
+          </table>
+
+          <div style="margin-top:30px; text-align:center;">
+            <a href="https://gemstonesprojectadmin.netlify.app/admin/orders/${order._id}" 
+               style="background:#4a90e2; color:#fff; text-decoration:none; padding:12px 30px; border-radius:6px; font-weight:bold;">
+              View Order
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"B Sirisena Holdings" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL,
+      subject: `📦 New Order Placed - ${formatOrderId(order._id)}`,
+      html: adminHtmlContent,
+    });
+
   } catch (err) {
     console.error("Error sending order email:", err);
   }
@@ -85,70 +122,63 @@ const sendOrderStatusEmail = async (order, userEmail, userName) => {
     let htmlContent = "";
     let subject = `🔔 Your Order Status Updated - ${formatOrderId(order._id)}`;
 
-    // Delivered Email Template (white with animation)
     if (order.status === "Delivered") {
       htmlContent = `
-      <div style="width:100%; background:#f4f4f8; padding:40px 0;">
-        <div style="max-width:650px; margin:0 auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:sans-serif; animation:fadeIn 1s ease-in;">
-          <div style="text-align:center; margin-bottom:20px;">
-            <div style="display:inline-block; border:3px solid #28a745; border-radius:50%; width:90px; height:90px; position:relative; animation:pop 0.8s ease;">
-              <div style="color:#28a745; font-size:48px; line-height:90px;">✔</div>
+        <div style="width:100%; background:#f4f4f8; padding:40px 0;">
+          <div style="max-width:650px; margin:0 auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:sans-serif; animation:fadeIn 1s ease-in;">
+            <div style="text-align:center; margin-bottom:20px;">
+              <div style="display:inline-block; border:3px solid #28a745; border-radius:50%; width:90px; height:90px; position:relative; animation:pop 0.8s ease;">
+                <div style="color:#28a745; font-size:48px; line-height:90px;">✔</div>
+              </div>
             </div>
+            <h2 style="text-align:center; color:#28a745;">Order Delivered!</h2>
+            <p style="font-size:16px; text-align:center;">Hi <strong>${userName}</strong>, your order <strong>${formatOrderId(order._id)}</strong> has been successfully delivered. 🎉</p>
+            <p style="font-size:15px; text-align:center; color:#555;">We hope you love your purchase. Thank you for trusting B Sirisena Holdings!</p>
+            <div style="margin-top:30px; text-align:center;">
+              <a href="https://gemstonesproject.netlify.app" style="background:#28a745; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Shop Again</a>
+            </div>
+            <p style="margin-top:30px; text-align:center; font-size:13px; color:#888;">B Sirisena Holdings Pvt Ltd</p>
           </div>
-          <h2 style="text-align:center; color:#28a745;">Order Delivered!</h2>
-          <p style="font-size:16px; text-align:center;">Hi <strong>${userName}</strong>, your order <strong>${formatOrderId(order._id)}</strong> has been successfully delivered. 🎉</p>
-          <p style="font-size:15px; text-align:center; color:#555;">We hope you love your purchase. Thank you for trusting B Sirisena Holdings!</p>
-          <div style="margin-top:30px; text-align:center;">
-            <a href="https://gemstonesproject.netlify.app" style="background:#28a745; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Shop Again</a>
-          </div>
-          <p style="margin-top:30px; text-align:center; font-size:13px; color:#888;">B Sirisena Holdings Pvt Ltd</p>
         </div>
-      </div>
 
-      <style>
-        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-        @keyframes pop { 0% {transform:scale(0.8);} 100% {transform:scale(1);} }
-      </style>
+        <style>
+          @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+          @keyframes pop { 0% {transform:scale(0.8);} 100% {transform:scale(1);} }
+        </style>
       `;
       subject = `✅ Your Order Delivered - ${formatOrderId(order._id)}`;
-    }
-
-    // Cancelled Email Template (white with animation)
-    else if (order.status === "Cancelled") {
+    } else if (order.status === "Cancelled") {
       htmlContent = `
-      <div style="width:100%; background:#f4f4f8; padding:40px 0;">
-        <div style="max-width:650px; margin:0 auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:sans-serif; animation:fadeIn 1s ease-in;">
-          <div style="text-align:center; margin-bottom:20px;">
-            <div style="display:inline-block; border:3px solid #dc3545; border-radius:50%; width:90px; height:90px; position:relative; animation:shake 0.8s ease;">
-              <div style="color:#dc3545; font-size:48px; line-height:90px;">✖</div>
+        <div style="width:100%; background:#f4f4f8; padding:40px 0;">
+          <div style="max-width:650px; margin:0 auto; background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); font-family:sans-serif; animation:fadeIn 1s ease-in;">
+            <div style="text-align:center; margin-bottom:20px;">
+              <div style="display:inline-block; border:3px solid #dc3545; border-radius:50%; width:90px; height:90px; position:relative; animation:shake 0.8s ease;">
+                <div style="color:#dc3545; font-size:48px; line-height:90px;">✖</div>
+              </div>
             </div>
+            <h2 style="text-align:center; color:#dc3545;">Order Cancelled</h2>
+            <p style="font-size:16px; text-align:center;">Hi <strong>${userName}</strong>, your order <strong>${formatOrderId(order._id)}</strong> has been cancelled.</p>
+            <p style="font-size:15px; text-align:center; color:#555;">If this was a mistake or you’d like to reorder, feel free to contact our support team.</p>
+            <div style="margin-top:30px; text-align:center;">
+              <a href="https://gemstonesproject.netlify.app/contact" style="background:#dc3545; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Contact Support</a>
+            </div>
+            <p style="margin-top:30px; text-align:center; font-size:13px; color:#888;">B Sirisena Holdings Pvt Ltd</p>
           </div>
-          <h2 style="text-align:center; color:#dc3545;">Order Cancelled</h2>
-          <p style="font-size:16px; text-align:center;">Hi <strong>${userName}</strong>, your order <strong>${formatOrderId(order._id)}</strong> has been cancelled.</p>
-          <p style="font-size:15px; text-align:center; color:#555;">If this was a mistake or you’d like to reorder, feel free to contact our support team.</p>
-          <div style="margin-top:30px; text-align:center;">
-            <a href="https://gemstonesproject.netlify.app/contact" style="background:#dc3545; color:#fff; text-decoration:none; padding:10px 25px; border-radius:6px; font-weight:bold;">Contact Support</a>
-          </div>
-          <p style="margin-top:30px; text-align:center; font-size:13px; color:#888;">B Sirisena Holdings Pvt Ltd</p>
         </div>
-      </div>
 
-      <style>
-        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-        @keyframes shake {
-          0% { transform: rotate(0deg); }
-          25% { transform: rotate(5deg); }
-          50% { transform: rotate(-5deg); }
-          75% { transform: rotate(3deg); }
-          100% { transform: rotate(0deg); }
-        }
-      </style>
+        <style>
+          @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+          @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(3deg); }
+            100% { transform: rotate(0deg); }
+          }
+        </style>
       `;
       subject = `❌ Your Order Cancelled - ${formatOrderId(order._id)}`;
-    }
-
-    // Normal status update
-    else {
+    } else {
       htmlContent = `
         <div style="width:100%; background:#f4f4f8; padding:40px 0;">
           <div style="max-width:650px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
@@ -171,7 +201,7 @@ const sendOrderStatusEmail = async (order, userEmail, userName) => {
     await transporter.sendMail({
       from: `"B Sirisena Holdings" <${process.env.EMAIL_USER}>`,
       to: userEmail,
-      subject: subject,
+      subject,
       html: htmlContent,
     });
   } catch (err) {
@@ -305,7 +335,6 @@ const UpdateStatus = async (req, res) => {
 
     io.emit("orderUpdated", updatedOrder);
 
-    // Send email to customer about status change
     const user = await userModel.findById(updatedOrder.userId);
     if (user && user.email) {
       await sendOrderStatusEmail(updatedOrder, user.email, user.name);

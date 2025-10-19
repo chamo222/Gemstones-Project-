@@ -120,11 +120,11 @@ function FinancePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div className="p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <h3 className="text-lg font-medium text-gray-600 mb-3">Wallet Balance</h3>
-              <p className="text-3xl font-bold text-gray-800">${walletBalance}</p>
+              <p className="text-3xl font-bold text-gray-800">+ ${walletBalance}</p>
             </motion.div>
             <motion.div className="p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <h3 className="text-lg font-medium text-gray-600 mb-3">Today's Earnings</h3>
-              <p className="text-3xl font-bold text-gray-800">${todaysEarnings}</p>
+              <p className="text-3xl font-bold text-gray-800">+ ${todaysEarnings}</p>
             </motion.div>
           </div>
 
