@@ -37,9 +37,17 @@ const Header = () => {
     <header className="w-full fixed top-0 left-0 z-50 bg-white shadow-sm">
       <div className="max-padd-container flexBetween py-3">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 flex-1">
-          <img src={logo} alt="Logo" className="h-10 w-10 object-cover rounded-full" />
-          <span className="text-[#4169E1] font-semibold text-lg hidden sm:inline">B Sirisena Holdings Pvt Ltd</span>
+       <Link to="/" className="flex items-center gap-2 flex-1">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-10 w-10 object-cover rounded-full"
+          />
+          <span
+            className="font-[PlayfairDisplay] text-[#1C1C1E] text-xl sm:text-2xl tracking-wide italic font-semibold hidden sm:inline transition-all duration-300 hover:text-[#B8860B]"
+          >
+            Saturno Eficaz
+          </span>
         </Link>
 
         {/* Navbar */}
